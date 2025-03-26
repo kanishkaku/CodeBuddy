@@ -33,6 +33,7 @@ export const tasks = pgTable("tasks", {
   estimatedHours: text("estimated_hours").notNull(),
   tags: text("tags").array(),
   link: text("link").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({

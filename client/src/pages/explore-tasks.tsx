@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, GitHub } from "lucide-react";
+import { Search, Github } from "lucide-react";
 import TaskCard from "@/components/tasks/task-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -110,14 +110,44 @@ export default function ExploreTasks() {
       </div>
 
       <Card className="p-6 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex space-x-2">
+            <Button 
+              variant={dataSource === "local" ? "default" : "outline"} 
+              onClick={() => setDataSource("local")}
+              className="flex items-center"
+            >
+              <span className="mr-1">Sample Tasks</span>
+            </Button>
+            <Button 
+              variant={dataSource === "github" ? "default" : "outline"} 
+              onClick={() => setDataSource("github")}
+              className="flex items-center"
+            >
+              <Github className="h-4 w-4 mr-1" />
+              <span>GitHub Tasks</span>
+            </Button>
+          </div>
+          {dataSource === "github" && (
+            <div className="text-sm text-gray-500">
+              Searching real open source issues from GitHub
+            </div>
+          )}
+        </div>
+        
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="relative">
+          <div className="relative md:col-span-2">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             <Input
-              placeholder="Search tasks..."
+              placeholder={dataSource === "github" ? "Search GitHub issues (e.g., 'react', 'bug fix', etc.)" : "Search tasks..."}
               className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && dataSource === "github") {
+                  handleSearch();
+                }
+              }}
             />
           </div>
           <div>
@@ -134,8 +164,23 @@ export default function ExploreTasks() {
             </Select>
           </div>
         </div>
+        
+        {dataSource === "github" && (
+          <div className="mt-4">
+            <Button 
+              onClick={handleSearch}
+              disabled={isSearching}
+              className="w-full"
+            >
+              {isSearching ? "Searching GitHub..." : "Search GitHub Issues"}
+            </Button>
+            <p className="mt-2 text-xs text-gray-500">
+              Press Enter or click the button to search. Results are fetched from popular open source repositories.
+            </p>
+          </div>
+        )}
 
-        {allTags.length > 0 && (
+        {dataSource === "local" && allTags.length > 0 && (
           <div className="mt-4">
             <p className="text-sm text-gray-500 mb-2">Popular tags:</p>
             <div className="flex flex-wrap gap-2">

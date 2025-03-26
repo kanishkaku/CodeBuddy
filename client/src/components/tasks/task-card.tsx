@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Calendar, Github, ExternalLink } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Task } from "@shared/schema";
@@ -126,12 +127,41 @@ export default function TaskCard({ task }: TaskCardProps) {
       <div className="p-4">
         <h3 className="font-medium text-gray-900">{task.title}</h3>
         <p className="mt-1 text-sm text-gray-500 line-clamp-2">{task.description}</p>
-        <div className="mt-4 flex items-center text-sm text-gray-500">
-          <Clock className="h-4 w-4 mr-1" />
-          <span>Est. {task.estimatedHours}</span>
+        
+        {task.tags && task.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1">
+            {task.tags.map((tag, index) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
+        
+        <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center">
+            <Clock className="h-3 w-3 mr-1" />
+            <span>Est. {task.estimatedHours}</span>
+          </div>
+          
+          {task.createdAt && (
+            <div className="flex items-center">
+              <Calendar className="h-3 w-3 mr-1" />
+              <span>
+                {new Date(task.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+          )}
         </div>
+        
         <div className="mt-4 flex space-x-2">
-          <Button onClick={startTask}>Start Task</Button>
+          <Button 
+            onClick={startTask} 
+            className="flex items-center"
+          >
+            <ExternalLink className="h-4 w-4 mr-1" />
+            <span>Start Task</span>
+          </Button>
           <Button
             variant="outline"
             onClick={handleSaveToggle}
@@ -140,6 +170,13 @@ export default function TaskCard({ task }: TaskCardProps) {
             {isSaved?.isSaved ? "Unsave" : "Save"}
           </Button>
         </div>
+        
+        {task.projectName.includes('/') && (
+          <div className="mt-2 text-xs text-gray-500 flex items-center">
+            <Github className="h-3 w-3 mr-1" />
+            <span>From GitHub</span>
+          </div>
+        )}
       </div>
     </Card>
   );
