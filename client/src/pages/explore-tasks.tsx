@@ -22,33 +22,64 @@ export default function ExploreTasks() {
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [dataSource, setDataSource] = useState<"local" | "github">("local");
   const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+
+  // Featured GitHub search terms for suggestions
+  const githubSuggestions = [
+    "good first issue",
+    "documentation",
+    "bug fix",
+    "enhancement",
+    "help wanted",
+    "feature request",
+    "ui",
+    "beginner friendly"
+  ];
 
   // Fetch local tasks or GitHub tasks based on dataSource
-  const { data: tasks, isLoading, refetch } = useQuery({
+  const { data: tasks, isLoading, error, refetch } = useQuery({
     queryKey: ["/api/tasks", dataSource, difficulty, searchQuery],
     queryFn: async () => {
+      setSearchError(null);
+      
       // If GitHub source, use the query parameters
       if (dataSource === "github") {
-        setIsSearching(true);
-        const url = new URL("/api/tasks", window.location.origin);
-        url.searchParams.append("source", "github");
-        if (difficulty) url.searchParams.append("difficulty", difficulty);
-        if (searchQuery) url.searchParams.append("q", searchQuery);
-        
-        const response = await fetch(url.toString());
-        if (!response.ok) {
-          throw new Error("Failed to fetch GitHub tasks");
+        try {
+          setIsSearching(true);
+          const url = new URL("/api/tasks", window.location.origin);
+          url.searchParams.append("source", "github");
+          if (difficulty) url.searchParams.append("difficulty", difficulty);
+          if (searchQuery) url.searchParams.append("q", searchQuery);
+          
+          const response = await fetch(url.toString());
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Failed to fetch GitHub tasks");
+          }
+          
+          const data = await response.json();
+          return data;
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : "Failed to fetch GitHub tasks";
+          setSearchError(errorMessage);
+          throw err;
+        } finally {
+          setIsSearching(false);
         }
-        setIsSearching(false);
-        return await response.json();
       }
       
       // Otherwise use default endpoint
-      const response = await fetch("/api/tasks");
-      if (!response.ok) {
-        throw new Error("Failed to fetch tasks");
+      try {
+        const response = await fetch("/api/tasks");
+        if (!response.ok) {
+          throw new Error("Failed to fetch tasks");
+        }
+        return await response.json();
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to fetch tasks";
+        setSearchError(errorMessage);
+        throw err;
       }
-      return await response.json();
     },
     enabled: true,
   });
@@ -66,7 +97,7 @@ export default function ExploreTasks() {
     let filtered = [...tasks];
 
     // Filter by difficulty
-    if (difficulty) {
+    if (difficulty && difficulty !== "all") {
       filtered = filtered.filter(task => task.difficulty === difficulty);
     }
 
@@ -85,10 +116,16 @@ export default function ExploreTasks() {
     setFilteredTasks(filtered);
   }, [tasks, difficulty, searchQuery, dataSource]);
 
+  // Reset difficulty when changing data source
+  useEffect(() => {
+    setDifficulty("all");
+  }, [dataSource]);
+  
   // Handle data source change
   const toggleDataSource = () => {
     const newSource = dataSource === "local" ? "github" : "local";
     setDataSource(newSource);
+    setSearchError(null);
     refetch();
   };
 
@@ -156,10 +193,21 @@ export default function ExploreTasks() {
                 <SelectValue placeholder="Select difficulty" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All difficulties</SelectItem>
-                <SelectItem value="beginner">Beginner</SelectItem>
-                <SelectItem value="intermediate">Intermediate</SelectItem>
-                <SelectItem value="advanced">Advanced</SelectItem>
+                <SelectItem value="all">All difficulties</SelectItem>
+                {dataSource === "github" ? (
+                  <>
+                    <SelectItem value="good-first-issue">Good First Issue</SelectItem>
+                    <SelectItem value="easy">Easy</SelectItem>
+                    <SelectItem value="bug">Bug</SelectItem>
+                    <SelectItem value="enhancement">Enhancement</SelectItem>
+                  </>
+                ) : (
+                  <>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -177,6 +225,29 @@ export default function ExploreTasks() {
             <p className="mt-2 text-xs text-gray-500">
               Press Enter or click the button to search. Results are fetched from popular open source repositories.
             </p>
+            
+            {/* GitHub search suggestions */}
+            <div className="mt-4">
+              <p className="text-sm text-gray-500 mb-2">Popular search terms:</p>
+              <div className="flex flex-wrap gap-2">
+                {githubSuggestions.map((suggestion, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="cursor-pointer"
+                    onClick={() => setSearchQuery(suggestion)}
+                  >
+                    {suggestion}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            
+            {searchError && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{searchError}</p>
+              </div>
+            )}
           </div>
         )}
 
