@@ -21,7 +21,7 @@ export default function ExploreTasks() {
   const [difficulty, setDifficulty] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  const [dataSource, setDataSource] = useState<"local" | "github">("local");
+  const [dataSource, setDataSource] = useState<"local" | "github" | "goodfirstissue">("local");
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [isRateLimited, setIsRateLimited] = useState(false);

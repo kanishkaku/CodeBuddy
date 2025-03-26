@@ -12,6 +12,7 @@ import {
   insertResumeSchema
 } from "@shared/schema";
 import { searchGitHubIssues, fetchGitHubIssueDetails } from "./githubService";
+import { fetchGoodFirstIssues } from "./goodFirstIssueService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Error handling middleware
@@ -77,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { difficulty, tags, source, q } = req.query;
       
-      // Check if we should fetch from GitHub
+      // Check if we should fetch from GitHub or Good First Issues
       if (source === 'github') {
         console.log(`Fetching GitHub issues with difficulty: ${difficulty}, query: ${q}`);
         const githubTasks = await searchGitHubIssues(
@@ -85,6 +86,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           q as string
         );
         return res.json(githubTasks);
+      } else if (source === 'goodfirstissue') {
+        console.log(`Fetching Good First Issues with language: ${difficulty}, tags: ${tags}`);
+        const language = difficulty as string !== 'all' ? difficulty as string : undefined;
+        const tagArray = tags ? (tags as string).split(',') : undefined;
+        
+        const goodFirstIssues = await fetchGoodFirstIssues(language, tagArray);
+        return res.json(goodFirstIssues);
       }
       
       // Otherwise, use in-memory storage
