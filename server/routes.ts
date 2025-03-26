@@ -1,0 +1,296 @@
+import type { Express, Request, Response } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { ZodError } from "zod";
+import { fromZodError } from "zod-validation-error";
+import { 
+  insertUserSchema, 
+  insertTaskSchema,
+  insertContributionSchema,
+  insertSavedTaskSchema,
+  insertResourceSchema,
+  insertResumeSchema
+} from "@shared/schema";
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Error handling middleware
+  const handleError = (err: any, res: Response) => {
+    console.error(err);
+    if (err instanceof ZodError) {
+      const validationError = fromZodError(err);
+      return res.status(400).json({ error: validationError.message });
+    }
+    return res.status(500).json({ error: err.message || "Internal server error" });
+  };
+
+  // Get current user (for development - would normally use auth middleware)
+  app.get("/api/current-user", async (_req, res) => {
+    try {
+      // For demo purposes, always return the sample user
+      const user = await storage.getUserByUsername("janesmith");
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Return user without password
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  // User routes
+  app.post("/api/users", async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      const user = await storage.createUser(userData);
+      
+      // Return user without password
+      const { password, ...userWithoutPassword } = user;
+      res.status(201).json(userWithoutPassword);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.get("/api/users/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Return user without password
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  // Task routes
+  app.get("/api/tasks", async (req, res) => {
+    try {
+      const { difficulty, tags } = req.query;
+      
+      let tasks;
+      if (difficulty) {
+        tasks = await storage.getTasksByDifficulty(difficulty as string);
+      } else if (tags) {
+        const tagArray = (tags as string).split(',');
+        tasks = await storage.getTasksByTags(tagArray);
+      } else {
+        tasks = await storage.getAllTasks();
+      }
+      
+      res.json(tasks);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.get("/api/tasks/:id", async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const task = await storage.getTask(taskId);
+      
+      if (!task) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+      
+      res.json(task);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.post("/api/tasks", async (req, res) => {
+    try {
+      const taskData = insertTaskSchema.parse(req.body);
+      const task = await storage.createTask(taskData);
+      res.status(201).json(task);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  // Contribution routes
+  app.get("/api/users/:userId/contributions", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const contributions = await storage.getUserContributions(userId);
+      res.json(contributions);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.post("/api/contributions", async (req, res) => {
+    try {
+      const contributionData = insertContributionSchema.parse(req.body);
+      const contribution = await storage.createContribution(contributionData);
+      res.status(201).json(contribution);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  // Saved tasks routes
+  app.get("/api/users/:userId/saved-tasks", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const savedTasks = await storage.getUserSavedTasks(userId);
+      res.json(savedTasks);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.post("/api/saved-tasks", async (req, res) => {
+    try {
+      const savedTaskData = insertSavedTaskSchema.parse(req.body);
+      const savedTask = await storage.saveTask(savedTaskData);
+      res.status(201).json(savedTask);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.delete("/api/users/:userId/saved-tasks/:taskId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const taskId = parseInt(req.params.taskId);
+      await storage.removeSavedTask(userId, taskId);
+      res.status(204).send();
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.get("/api/users/:userId/saved-tasks/:taskId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const taskId = parseInt(req.params.taskId);
+      const isSaved = await storage.isSavedTask(userId, taskId);
+      res.json({ isSaved });
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  // Resource routes
+  app.get("/api/resources", async (req, res) => {
+    try {
+      const { category } = req.query;
+      
+      let resources;
+      if (category) {
+        resources = await storage.getResourcesByCategory(category as string);
+      } else {
+        resources = await storage.getAllResources();
+      }
+      
+      res.json(resources);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.get("/api/resources/:id", async (req, res) => {
+    try {
+      const resourceId = parseInt(req.params.id);
+      const resource = await storage.getResource(resourceId);
+      
+      if (!resource) {
+        return res.status(404).json({ error: "Resource not found" });
+      }
+      
+      res.json(resource);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.post("/api/resources", async (req, res) => {
+    try {
+      const resourceData = insertResourceSchema.parse(req.body);
+      const resource = await storage.createResource(resourceData);
+      res.status(201).json(resource);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  // Resume routes
+  app.get("/api/users/:userId/resume", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const resume = await storage.getUserResume(userId);
+      
+      if (!resume) {
+        return res.status(404).json({ error: "Resume not found" });
+      }
+      
+      res.json(resume);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.post("/api/resumes", async (req, res) => {
+    try {
+      const resumeData = insertResumeSchema.parse(req.body);
+      const resume = await storage.createResume(resumeData);
+      res.status(201).json(resume);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  app.patch("/api/users/:userId/resume", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const resumeData = req.body;
+      const resume = await storage.updateResume(userId, resumeData);
+      
+      if (!resume) {
+        return res.status(404).json({ error: "Resume not found" });
+      }
+      
+      res.json(resume);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  // User stats - Get counts of contributions and saved tasks
+  app.get("/api/users/:userId/stats", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      const contributions = await storage.getUserContributions(userId);
+      const savedTasks = await storage.getUserSavedTasks(userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      res.json({
+        tasksCompleted: contributions.length,
+        savedTasks: savedTasks.length,
+        level: user.level,
+        levelProgress: user.levelProgress
+      });
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  const httpServer = createServer(app);
+
+  return httpServer;
+}
