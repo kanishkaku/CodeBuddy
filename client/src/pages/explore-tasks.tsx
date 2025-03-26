@@ -10,11 +10,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Github } from "lucide-react";
+import { Search, Github, AlertTriangle, Hourglass } from "lucide-react";
 import TaskCard from "@/components/tasks/task-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Task } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ExploreTasks() {
   const [difficulty, setDifficulty] = useState<string>("");
@@ -23,6 +24,8 @@ export default function ExploreTasks() {
   const [dataSource, setDataSource] = useState<"local" | "github">("local");
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const { toast } = useToast();
 
   // Featured GitHub search terms for suggestions
   const githubSuggestions = [
@@ -41,6 +44,7 @@ export default function ExploreTasks() {
     queryKey: ["/api/tasks", dataSource, difficulty, searchQuery],
     queryFn: async () => {
       setSearchError(null);
+      setIsRateLimited(false);
       
       // If GitHub source, use the query parameters
       if (dataSource === "github") {
@@ -54,13 +58,33 @@ export default function ExploreTasks() {
           const response = await fetch(url.toString());
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || "Failed to fetch GitHub tasks");
+            const errorMsg = errorData.error || "Failed to fetch GitHub tasks";
+            
+            // Check if it's a rate limit error
+            if (errorMsg.toLowerCase().includes("rate limit") || 
+                errorMsg.toLowerCase().includes("exceeded") ||
+                response.status === 403) {
+              setIsRateLimited(true);
+              throw new Error("GitHub API rate limit exceeded. Please wait a few minutes before trying again.");
+            }
+            
+            throw new Error(errorMsg);
           }
           
           const data = await response.json();
           return data;
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : "Failed to fetch GitHub tasks";
+          
+          if (errorMessage.toLowerCase().includes("rate limit")) {
+            setIsRateLimited(true);
+            toast({
+              title: "GitHub API Rate Limit",
+              description: "Rate limit exceeded. Results shown may be from cache. Try again in a few minutes.",
+              variant: "destructive"
+            });
+          }
+          
           setSearchError(errorMessage);
           throw err;
         } finally {
@@ -82,6 +106,9 @@ export default function ExploreTasks() {
       }
     },
     enabled: true,
+    retry: 1, // Only retry once to avoid multiple GitHub API calls
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   useEffect(() => {
@@ -220,8 +247,27 @@ export default function ExploreTasks() {
               disabled={isSearching}
               className="w-full"
             >
-              {isSearching ? "Searching GitHub..." : "Search GitHub Issues"}
+              {isSearching ? (
+                <span className="flex items-center">
+                  <Hourglass className="h-4 w-4 mr-2 animate-spin" />
+                  Searching GitHub...
+                </span>
+              ) : isRateLimited ? (
+                <span className="flex items-center">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Rate Limited - Using Cache
+                </span>
+              ) : (
+                "Search GitHub Issues"
+              )}
             </Button>
+
+            {isRateLimited && (
+              <div className="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
+                GitHub rate limit reached. Results shown may be cached or limited. Please wait a few minutes before trying again.
+              </div>
+            )}
+            
             <p className="mt-2 text-xs text-gray-500">
               Press Enter or click the button to search. Results are fetched from popular open source repositories.
             </p>
@@ -234,8 +280,12 @@ export default function ExploreTasks() {
                   <Badge
                     key={index}
                     variant="secondary"
-                    className="cursor-pointer"
-                    onClick={() => setSearchQuery(suggestion)}
+                    className="cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => {
+                      setSearchQuery(suggestion);
+                      // Automatically search when a suggestion is clicked
+                      setTimeout(() => handleSearch(), 100);
+                    }}
                   >
                     {suggestion}
                   </Badge>
@@ -243,7 +293,7 @@ export default function ExploreTasks() {
               </div>
             </div>
             
-            {searchError && (
+            {searchError && !isRateLimited && (
               <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
                 <p className="text-sm text-red-600">{searchError}</p>
               </div>
@@ -301,6 +351,31 @@ export default function ExploreTasks() {
           {filteredTasks.map(task => (
             <TaskCard key={task.id} task={task} />
           ))}
+        </div>
+      ) : searchError && dataSource === "github" ? (
+        <div className="text-center py-12 border rounded-lg bg-white">
+          <div className="flex flex-col items-center">
+            <AlertTriangle className="h-12 w-12 text-amber-500 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading GitHub Tasks</h3>
+            <p className="text-gray-500 max-w-md mb-4">{searchError}</p>
+            <Button 
+              variant="outline" 
+              onClick={() => setDataSource("local")}
+              className="mt-2"
+            >
+              Switch to Sample Tasks
+            </Button>
+          </div>
+        </div>
+      ) : dataSource === "github" && !searchQuery && !isRateLimited ? (
+        <div className="text-center py-12 border rounded-lg bg-white">
+          <div className="flex flex-col items-center">
+            <Github className="h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Search for GitHub Tasks</h3>
+            <p className="text-gray-500 max-w-md">
+              Enter a search term or select a popular search suggestion above to find real open source issues on GitHub
+            </p>
+          </div>
         </div>
       ) : (
         <div className="text-center py-12 border rounded-lg bg-white">
