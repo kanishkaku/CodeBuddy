@@ -21,7 +21,7 @@ export default function ExploreTasks() {
   const [difficulty, setDifficulty] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  const [dataSource, setDataSource] = useState<"local" | "github" | "goodfirstissue">("local");
+  const [dataSource] = useState<"goodfirstissue">("goodfirstissue");
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [isRateLimited, setIsRateLimited] = useState(false);
@@ -227,38 +227,15 @@ export default function ExploreTasks() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex space-x-2 flex-wrap gap-2">
             <Button 
-              variant={dataSource === "local" ? "default" : "outline"} 
-              onClick={() => setDataSource("local")}
-              className="flex items-center"
-            >
-              <span className="mr-1">Sample Tasks</span>
-            </Button>
-            <Button 
-              variant={dataSource === "github" ? "default" : "outline"} 
-              onClick={() => setDataSource("github")}
-              className="flex items-center"
-            >
-              <Github className="h-4 w-4 mr-1" />
-              <span>GitHub Search</span>
-            </Button>
-            <Button 
-              variant={dataSource === "goodfirstissue" ? "default" : "outline"} 
-              onClick={() => setDataSource("goodfirstissue")}
+              variant="default"
               className="flex items-center"
             >
               <span className="mr-1">Good First Issues</span>
             </Button>
           </div>
-          {dataSource === "github" && (
-            <div className="text-sm text-gray-500 hidden md:block">
-              Searching real open source issues from GitHub
-            </div>
-          )}
-          {dataSource === "goodfirstissue" && (
-            <div className="text-sm text-gray-500 hidden md:block">
-              Real tasks from goodfirstissue.dev
-            </div>
-          )}
+          <div className="text-sm text-gray-500 hidden md:block">
+            Real tasks from goodfirstissue.dev
+          </div>
         </div>
         
         <div className="grid gap-4 md:grid-cols-3">
