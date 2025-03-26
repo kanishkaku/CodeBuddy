@@ -38,15 +38,27 @@ export default function ExploreTasks() {
     "ui",
     "beginner friendly"
   ];
+  
+  // Featured label suggestions for Good First Issues
+  const goodFirstIssueLabelSuggestions = [
+    "documentation",
+    "enhancement",
+    "bug",
+    "feature",
+    "help wanted",
+    "ui",
+    "test",
+    "refactoring"
+  ];
 
-  // Fetch local tasks or GitHub tasks based on dataSource
+  // Fetch tasks based on dataSource (local, github, or goodfirstissue)
   const { data: tasks, isLoading, error, refetch } = useQuery({
     queryKey: ["/api/tasks", dataSource, difficulty, searchQuery],
     queryFn: async () => {
       setSearchError(null);
       setIsRateLimited(false);
       
-      // If GitHub source, use the query parameters
+      // If GitHub source, use the query parameters for github search
       if (dataSource === "github") {
         try {
           setIsSearching(true);
@@ -90,9 +102,47 @@ export default function ExploreTasks() {
         } finally {
           setIsSearching(false);
         }
+      } 
+      // If Good First Issues source, use the goodfirstissue endpoint
+      else if (dataSource === "goodfirstissue") {
+        try {
+          setIsSearching(true);
+          const url = new URL("/api/tasks", window.location.origin);
+          url.searchParams.append("source", "goodfirstissue");
+          
+          // Add language filter if difficulty is specified (maps to programming language)
+          if (difficulty && difficulty !== "all") {
+            url.searchParams.append("difficulty", difficulty); // Using difficulty param for language
+          }
+          
+          // Add tags if searchQuery is specified
+          if (searchQuery) {
+            url.searchParams.append("tags", searchQuery); // Can be used to filter by tags/keywords
+          }
+          
+          const response = await fetch(url.toString());
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Failed to fetch Good First Issues");
+          }
+          
+          const data = await response.json();
+          return data;
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : "Failed to fetch Good First Issues";
+          setSearchError(errorMessage);
+          toast({
+            title: "Error Loading Good First Issues",
+            description: errorMessage,
+            variant: "destructive"
+          });
+          throw err;
+        } finally {
+          setIsSearching(false);
+        }
       }
       
-      // Otherwise use default endpoint
+      // Otherwise use default endpoint for local tasks
       try {
         const response = await fetch("/api/tasks");
         if (!response.ok) {
@@ -106,7 +156,7 @@ export default function ExploreTasks() {
       }
     },
     enabled: true,
-    retry: 1, // Only retry once to avoid multiple GitHub API calls
+    retry: 1, // Only retry once to avoid multiple API calls
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
@@ -114,8 +164,8 @@ export default function ExploreTasks() {
   useEffect(() => {
     if (!tasks) return;
 
-    // If GitHub source, no client-side filtering needed
-    if (dataSource === "github") {
+    // If external API source, no client-side filtering needed
+    if (dataSource === "github" || dataSource === "goodfirstissue") {
       setFilteredTasks(tasks);
       return;
     }
@@ -175,7 +225,7 @@ export default function ExploreTasks() {
 
       <Card className="p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 flex-wrap gap-2">
             <Button 
               variant={dataSource === "local" ? "default" : "outline"} 
               onClick={() => setDataSource("local")}
@@ -189,12 +239,24 @@ export default function ExploreTasks() {
               className="flex items-center"
             >
               <Github className="h-4 w-4 mr-1" />
-              <span>GitHub Tasks</span>
+              <span>GitHub Search</span>
+            </Button>
+            <Button 
+              variant={dataSource === "goodfirstissue" ? "default" : "outline"} 
+              onClick={() => setDataSource("goodfirstissue")}
+              className="flex items-center"
+            >
+              <span className="mr-1">Good First Issues</span>
             </Button>
           </div>
           {dataSource === "github" && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 hidden md:block">
               Searching real open source issues from GitHub
+            </div>
+          )}
+          {dataSource === "goodfirstissue" && (
+            <div className="text-sm text-gray-500 hidden md:block">
+              Real tasks from goodfirstissue.dev
             </div>
           )}
         </div>
@@ -203,12 +265,18 @@ export default function ExploreTasks() {
           <div className="relative md:col-span-2">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             <Input
-              placeholder={dataSource === "github" ? "Search GitHub issues (e.g., 'react', 'bug fix', etc.)" : "Search tasks..."}
+              placeholder={
+                dataSource === "github" 
+                  ? "Search GitHub issues (e.g., 'react', 'bug fix', etc.)" 
+                  : dataSource === "goodfirstissue"
+                    ? "Filter by labels (e.g., 'documentation', 'enhancement', etc.)"
+                    : "Search tasks..."
+              }
               className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && dataSource === "github") {
+                if (e.key === 'Enter' && (dataSource === "github" || dataSource === "goodfirstissue")) {
                   handleSearch();
                 }
               }}
@@ -220,9 +288,23 @@ export default function ExploreTasks() {
                 <SelectValue placeholder="Select difficulty" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All difficulties</SelectItem>
-                {dataSource === "github" ? (
+                {dataSource === "goodfirstissue" ? (
                   <>
+                    <SelectItem value="all">All Languages</SelectItem>
+                    <SelectItem value="javascript">JavaScript</SelectItem>
+                    <SelectItem value="typescript">TypeScript</SelectItem>
+                    <SelectItem value="python">Python</SelectItem>
+                    <SelectItem value="java">Java</SelectItem>
+                    <SelectItem value="ruby">Ruby</SelectItem>
+                    <SelectItem value="go">Go</SelectItem>
+                    <SelectItem value="rust">Rust</SelectItem>
+                    <SelectItem value="c#">C#</SelectItem>
+                    <SelectItem value="c++">C++</SelectItem>
+                    <SelectItem value="php">PHP</SelectItem>
+                  </>
+                ) : dataSource === "github" ? (
+                  <>
+                    <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="good-first-issue">Good First Issue</SelectItem>
                     <SelectItem value="easy">Easy</SelectItem>
                     <SelectItem value="bug">Bug</SelectItem>
@@ -230,6 +312,7 @@ export default function ExploreTasks() {
                   </>
                 ) : (
                   <>
+                    <SelectItem value="all">All Difficulty</SelectItem>
                     <SelectItem value="beginner">Beginner</SelectItem>
                     <SelectItem value="intermediate">Intermediate</SelectItem>
                     <SelectItem value="advanced">Advanced</SelectItem>
@@ -301,6 +384,56 @@ export default function ExploreTasks() {
           </div>
         )}
 
+        {dataSource === "goodfirstissue" && (
+          <div className="mt-4">
+            <Button 
+              onClick={handleSearch}
+              disabled={isSearching}
+              className="w-full"
+            >
+              {isSearching ? (
+                <span className="flex items-center">
+                  <Hourglass className="h-4 w-4 mr-2 animate-spin" />
+                  Finding Issues...
+                </span>
+              ) : (
+                "Find Good First Issues"
+              )}
+            </Button>
+            
+            <p className="mt-2 text-xs text-gray-500">
+              Select a programming language and optionally filter by labels. Results from goodfirstissue.dev.
+            </p>
+            
+            {/* Good First Issue label suggestions */}
+            <div className="mt-4">
+              <p className="text-sm text-gray-500 mb-2">Popular labels:</p>
+              <div className="flex flex-wrap gap-2">
+                {goodFirstIssueLabelSuggestions.map((suggestion, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => {
+                      setSearchQuery(suggestion);
+                      // Automatically search when a suggestion is clicked
+                      setTimeout(() => handleSearch(), 100);
+                    }}
+                  >
+                    {suggestion}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            
+            {searchError && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{searchError}</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {dataSource === "local" && allTags.length > 0 && (
           <div className="mt-4">
             <p className="text-sm text-gray-500 mb-2">Popular tags:</p>
@@ -352,11 +485,13 @@ export default function ExploreTasks() {
             <TaskCard key={task.id} task={task} />
           ))}
         </div>
-      ) : searchError && dataSource === "github" ? (
+      ) : searchError && (dataSource === "github" || dataSource === "goodfirstissue") ? (
         <div className="text-center py-12 border rounded-lg bg-white">
           <div className="flex flex-col items-center">
             <AlertTriangle className="h-12 w-12 text-amber-500 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading GitHub Tasks</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {dataSource === "github" ? "Error Loading GitHub Tasks" : "Error Loading Good First Issues"}
+            </h3>
             <p className="text-gray-500 max-w-md mb-4">{searchError}</p>
             <Button 
               variant="outline" 
@@ -374,6 +509,16 @@ export default function ExploreTasks() {
             <h3 className="text-lg font-medium text-gray-900 mb-2">Search for GitHub Tasks</h3>
             <p className="text-gray-500 max-w-md">
               Enter a search term or select a popular search suggestion above to find real open source issues on GitHub
+            </p>
+          </div>
+        </div>
+      ) : dataSource === "goodfirstissue" && !searchQuery ? (
+        <div className="text-center py-12 border rounded-lg bg-white">
+          <div className="flex flex-col items-center">
+            <Code className="h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Find Good First Issues</h3>
+            <p className="text-gray-500 max-w-md">
+              Select a programming language and optionally filter by labels to find beginner-friendly issues on open source projects
             </p>
           </div>
         </div>
