@@ -91,8 +91,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const language = difficulty as string !== 'all' ? difficulty as string : undefined;
         const tagArray = tags ? (tags as string).split(',') : undefined;
         
-        const goodFirstIssues = await fetchGoodFirstIssues(language, tagArray);
-        return res.json(goodFirstIssues);
+        try {
+          const goodFirstIssues = await fetchGoodFirstIssues(language, tagArray);
+          return res.json(goodFirstIssues);
+        } catch (error) {
+          // Log the error but don't expose it to the client
+          console.error(`Error fetching from GitHub API: ${error}`);
+          
+          // Return an empty array with a 200 status code instead of a 500 error
+          // This allows the frontend to handle it gracefully
+          return res.json([]);
+        }
       }
       
       // Otherwise, use in-memory storage

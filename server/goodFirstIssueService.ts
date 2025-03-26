@@ -85,49 +85,82 @@ export async function fetchGoodFirstIssues(
   }
   
   try {
-    log(`[GoodFirstIssue Service] Fetching issues from goodfirstissue.dev API`, 'express');
+    log(`[GoodFirstIssue Service] Fetching issues from GitHub API with 'good first issue' label`, 'express');
     
     // Build the API URL with optional filters
-    let apiUrl = 'https://goodfirstissue.dev/api/issues';
+    // Note: If goodfirstissue.dev API is offline, we'll use GitHub API as a fallback
     
-    // Parse the response
-    const response = await fetch(apiUrl);
+    // For the time being, let's simulate results with GitHub issues filtered by "good first issue" label
+    const apiUrl = 'https://api.github.com/search/issues?q=label:"good+first+issue"+is:open';
+    
+    // Add language filter if provided
+    const fullUrl = language 
+      ? `${apiUrl}+language:${language}`
+      : apiUrl;
+      
+    // GitHub API requires a User-Agent header and benefits from authentication
+    // to increase rate limits
+    const headers: Record<string, string> = {
+      'User-Agent': 'OSResume-App'
+    };
+    
+    // Add Authorization header if GITHUB_TOKEN is available
+    if (process.env.GITHUB_TOKEN) {
+      headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+      log(`[GoodFirstIssue Service] Using GitHub token for authentication`, 'express');
+    }
+    
+    const response = await fetch(fullUrl, { headers });
     
     if (!response.ok) {
       throw new Error(`Failed to fetch good first issues: ${response.status} ${response.statusText}`);
     }
     
-    const issues: GoodFirstIssue[] = await response.json();
+    // GitHub search API returns a different format, so we need to adapt
+    const searchResult = await response.json() as any;
+    const issues: any[] = searchResult.items || [];
     
-    // Apply client-side filtering if needed
+    // We're using GitHub API which has a different structure
     let filteredIssues = issues;
     
-    if (language) {
-      filteredIssues = filteredIssues.filter(issue => 
-        issue.repository.language?.toLowerCase() === language.toLowerCase()
-      );
-    }
-    
+    // Labels filtering will be done differently for GitHub API
     if (labels && labels.length > 0) {
       filteredIssues = filteredIssues.filter(issue => 
-        issue.labels.some(label => 
-          labels.includes(label.name.toLowerCase())
+        issue.labels && issue.labels.some((label: any) => 
+          labels.some(searchLabel => 
+            label.name.toLowerCase().includes(searchLabel.toLowerCase())
+          )
         )
       );
     }
     
     // Convert to our Task format
     const tasks: Task[] = filteredIssues.map((issue, index) => {
-      // Extract difficulty from labels
+      // Extract repository info from the repository_url
+      // Format: https://api.github.com/repos/owner/repo
+      const repoUrlParts = (issue.repository_url || '').split('/');
+      const repoOwner = repoUrlParts[repoUrlParts.length - 2] || 'unknown';
+      const repoName = repoUrlParts[repoUrlParts.length - 1] || 'unknown';
+      const fullRepoName = `${repoOwner}/${repoName}`;
+      
+      // Extract difficulty from labels - defaults to beginner for "good first issue"
       let difficulty = 'beginner';
-      if (issue.labels.some(label => label.name.toLowerCase().includes('intermediate'))) {
-        difficulty = 'intermediate';
-      } else if (issue.labels.some(label => label.name.toLowerCase().includes('advanced'))) {
-        difficulty = 'advanced';
+      if (issue.labels && Array.isArray(issue.labels)) {
+        if (issue.labels.some((label: any) => 
+          label.name.toLowerCase().includes('intermediate')
+        )) {
+          difficulty = 'intermediate';
+        } else if (issue.labels.some((label: any) => 
+          label.name.toLowerCase().includes('advanced')
+        )) {
+          difficulty = 'advanced';
+        }
       }
       
       // Extract tags from labels
-      const tags = issue.labels.map(label => label.name);
+      const tags = Array.isArray(issue.labels) 
+        ? issue.labels.map((label: any) => label.name) 
+        : ['good first issue'];
       
       // Truncate body if too long
       const description = issue.body || 'No description provided';
@@ -135,13 +168,18 @@ export async function fetchGoodFirstIssues(
         ? `${description.substring(0, 300)}...` 
         : description;
       
+      // Use avatar URL if available 
+      const avatarUrl = issue.user && issue.user.avatar_url 
+        ? issue.user.avatar_url 
+        : `https://github.com/${repoOwner}.png`;
+      
       return {
-        id: parseInt(issue.id) || index + 1000, // Use issue ID or generate a unique ID
+        id: issue.id || index + 1000, // Use issue ID or generate a unique ID
         title: issue.title,
         link: issue.html_url,
         description: truncatedDescription,
-        projectName: issue.repository.full_name,
-        projectImageUrl: issue.repository.owner.avatar_url,
+        projectName: fullRepoName,
+        projectImageUrl: avatarUrl,
         estimatedHours: '2-4', // Default estimate
         difficulty,
         tags,
