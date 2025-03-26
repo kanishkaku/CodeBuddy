@@ -411,23 +411,7 @@ export default function ExploreTasks() {
           </div>
         )}
 
-        {dataSource === "local" && allTags.length > 0 && (
-          <div className="mt-4">
-            <p className="text-sm text-gray-500 mb-2">Popular tags:</p>
-            <div className="flex flex-wrap gap-2">
-              {allTags.slice(0, 10).map((tag, index) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  className="cursor-pointer"
-                  onClick={() => setSearchQuery(tag)}
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
+        
       </Card>
 
       {isLoading ? (
