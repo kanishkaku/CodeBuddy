@@ -11,6 +11,7 @@ import {
   insertResourceSchema,
   insertResumeSchema
 } from "@shared/schema";
+import { searchGitHubIssues, fetchGitHubIssueDetails } from "./githubService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Error handling middleware
@@ -74,8 +75,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
   app.get("/api/tasks", async (req, res) => {
     try {
-      const { difficulty, tags } = req.query;
+      const { difficulty, tags, source, q } = req.query;
       
+      // Check if we should fetch from GitHub
+      if (source === 'github') {
+        console.log(`Fetching GitHub issues with difficulty: ${difficulty}, query: ${q}`);
+        const githubTasks = await searchGitHubIssues(
+          difficulty as string,
+          q as string
+        );
+        return res.json(githubTasks);
+      }
+      
+      // Otherwise, use in-memory storage
       let tasks;
       if (difficulty) {
         tasks = await storage.getTasksByDifficulty(difficulty as string);
@@ -94,6 +106,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/tasks/:id", async (req, res) => {
     try {
+      const { source } = req.query;
+      
+      // Check if we should fetch from GitHub
+      if (source === 'github') {
+        const { owner, repo, issueNumber } = req.query;
+        if (!owner || !repo || !issueNumber) {
+          return res.status(400).json({ error: "Missing GitHub repository or issue information" });
+        }
+        
+        console.log(`Fetching GitHub issue details: ${owner}/${repo}#${issueNumber}`);
+        const githubTask = await fetchGitHubIssueDetails(
+          owner as string,
+          repo as string,
+          parseInt(issueNumber as string)
+        );
+        
+        if (!githubTask) {
+          return res.status(404).json({ error: "GitHub issue not found" });
+        }
+        
+        return res.json(githubTask);
+      }
+      
+      // Otherwise, use in-memory storage
       const taskId = parseInt(req.params.id);
       const task = await storage.getTask(taskId);
       

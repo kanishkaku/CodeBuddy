@@ -10,22 +10,59 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search } from "lucide-react";
+import { Search, GitHub } from "lucide-react";
 import TaskCard from "@/components/tasks/task-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Task } from "@shared/schema";
 
 export default function ExploreTasks() {
   const [difficulty, setDifficulty] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [filteredTasks, setFilteredTasks] = useState<any[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [dataSource, setDataSource] = useState<"local" | "github">("local");
+  const [isSearching, setIsSearching] = useState(false);
 
-  const { data: tasks, isLoading } = useQuery({
-    queryKey: ["/api/tasks"],
+  // Fetch local tasks or GitHub tasks based on dataSource
+  const { data: tasks, isLoading, refetch } = useQuery({
+    queryKey: ["/api/tasks", dataSource, difficulty, searchQuery],
+    queryFn: async () => {
+      // If GitHub source, use the query parameters
+      if (dataSource === "github") {
+        setIsSearching(true);
+        const url = new URL("/api/tasks", window.location.origin);
+        url.searchParams.append("source", "github");
+        if (difficulty) url.searchParams.append("difficulty", difficulty);
+        if (searchQuery) url.searchParams.append("q", searchQuery);
+        
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+          throw new Error("Failed to fetch GitHub tasks");
+        }
+        setIsSearching(false);
+        return await response.json();
+      }
+      
+      // Otherwise use default endpoint
+      const response = await fetch("/api/tasks");
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks");
+      }
+      return await response.json();
+    },
+    enabled: true,
   });
 
   useEffect(() => {
     if (!tasks) return;
 
+    // If GitHub source, no client-side filtering needed
+    if (dataSource === "github") {
+      setFilteredTasks(tasks);
+      return;
+    }
+
+    // Local filtering for the in-memory tasks
     let filtered = [...tasks];
 
     // Filter by difficulty
@@ -46,7 +83,19 @@ export default function ExploreTasks() {
     }
 
     setFilteredTasks(filtered);
-  }, [tasks, difficulty, searchQuery]);
+  }, [tasks, difficulty, searchQuery, dataSource]);
+
+  // Handle data source change
+  const toggleDataSource = () => {
+    const newSource = dataSource === "local" ? "github" : "local";
+    setDataSource(newSource);
+    refetch();
+  };
+
+  // Handle search submit
+  const handleSearch = () => {
+    refetch();
+  };
 
   // Get unique tags from all tasks
   const allTags = tasks ? Array.from(new Set(tasks.flatMap(task => task.tags || []))) : [];
