@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Github, AlertTriangle, Hourglass } from "lucide-react";
+import { Search, Github, AlertTriangle, Hourglass, Code } from "lucide-react";
 import TaskCard from "@/components/tasks/task-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
