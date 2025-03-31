@@ -51,7 +51,16 @@ export const contributions = pgTable("contributions", {
 });
 
 export const insertContributionSchema = createInsertSchema(contributions).extend({
-  taskId: z.number().or(z.string().transform(val => BigInt(val))).transform(val => Number(val))
+  taskId: z.union([
+    z.number(),
+    z.string().transform(val => {
+      // If it's a GitHub PR URL, extract the issue number
+      if (val.includes('github.com') && val.includes('/pull/')) {
+        return Number(val.split('/pull/')[1]);
+      }
+      return Number(val);
+    })
+  ])
 }).omit({
   id: true,
 });
