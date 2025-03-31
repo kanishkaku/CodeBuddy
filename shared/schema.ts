@@ -54,13 +54,18 @@ export const insertContributionSchema = createInsertSchema(contributions).extend
   taskId: z.union([
     z.number(),
     z.string().transform(val => {
-      // If it's a GitHub PR URL, extract the issue number
-      if (val.includes('github.com') && val.includes('/pull/')) {
-        return Number(val.split('/pull/')[1]);
+      if (val.includes('github.com')) {
+        const parts = val.split('/');
+        // Find the pull number index
+        const pullIndex = parts.indexOf('pull');
+        if (pullIndex !== -1 && parts[pullIndex + 1]) {
+          // Get clean number without any extra chars
+          return Number(parts[pullIndex + 1].replace(/[^0-9]/g, ''));
+        }
       }
       return Number(val);
     })
-  ])
+  ]).transform(val => val % 2147483647) // Ensure number is within PostgreSQL integer range
 }).omit({
   id: true,
 });
