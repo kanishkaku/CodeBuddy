@@ -141,20 +141,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGitHub = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log('Attempting GitHub sign in, redirect URL:', window.location.origin);
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
           redirectTo: window.location.origin
         }
       })
       
-      if (error) throw error
+      if (error) {
+        console.error('GitHub OAuth error details:', error);
+        throw error;
+      }
+      
+      console.log('GitHub OAuth initiated successfully, redirect data:', data);
     } catch (error: unknown) {
       const authError = error as AuthError
       console.error('Error signing in with GitHub:', authError)
       toast({
         title: 'Authentication error',
-        description: authError.message || 'Failed to sign in with GitHub',
+        description: `Failed to sign in with GitHub: ${authError.message}`,
         variant: 'destructive',
       })
     }
@@ -162,18 +169,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const signInWithEmailPassword = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Attempting email/password sign in');
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       })
       
-      if (error) throw error
+      if (error) {
+        console.error('Email/password sign in error details:', error);
+        throw error;
+      }
+      
+      console.log('Email/password sign in successful, user data:', data);
     } catch (error: unknown) {
       const authError = error as AuthError
       console.error('Error signing in with email/password:', authError)
       toast({
         title: 'Authentication error',
-        description: authError.message || 'Failed to sign in with email/password',
+        description: `Failed to sign in: ${authError.message}`,
         variant: 'destructive',
       })
     }
@@ -181,7 +195,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const signUpWithEmailPassword = async (email: string, password: string, displayName: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      console.log('Attempting email/password sign up for:', email);
+      
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -191,7 +207,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       
-      if (error) throw error
+      if (error) {
+        console.error('Sign up error details:', error);
+        throw error;
+      }
+      
+      console.log('Sign up response:', data);
       
       toast({
         title: 'Account created',
@@ -202,7 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Error signing up:', authError)
       toast({
         title: 'Sign up error',
-        description: authError.message || 'Failed to create account',
+        description: `Failed to create account: ${authError.message}`,
         variant: 'destructive',
       })
     }
