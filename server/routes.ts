@@ -25,11 +25,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(500).json({ error: err.message || "Internal server error" });
   };
 
-  // Get current user (for development - would normally use auth middleware)
-  app.get("/api/current-user", async (_req, res) => {
+  // Authentication middleware to check for Supabase auth token
+  const authenticateUser = async (req: Request, res: Response, next: Function) => {
     try {
-      // For demo purposes, always return the sample user
-      const user = await storage.getUserByUsername("janesmith");
+      // Get the auth token from the request headers
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      // The actual validation would happen in the frontend with Supabase SDK
+      // This is a simplified approach for the proof of concept
+      // In a production environment, we would validate the JWT token here
+      
+      // For now, we'll just check if the token exists and pass it through
+      // The frontend Supabase client handles the actual authentication
+      next();
+    } catch (err) {
+      handleError(err, res);
+    }
+  };
+
+  // Get current user with Supabase auth
+  app.get("/api/current-user", authenticateUser, async (req, res) => {
+    try {
+      // Extract userId from the Authorization header
+      // In a real implementation, we would fully decode and validate the JWT token
+      // For this prototype, we accept the userId in a header or query param
+      const userId = req.query.userId as string || req.headers['x-user-id'] as string;
+      
+      if (!userId) {
+        return res.status(400).json({ error: "No user ID provided" });
+      }
+      
+      // If userId is provided, get that user
+      const user = await storage.getUser(parseInt(userId));
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
@@ -51,6 +82,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return user without password
       const { password, ...userWithoutPassword } = user;
       res.status(201).json(userWithoutPassword);
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+  
+  // Supabase auth user creation/sync
+  app.post("/api/supabase-auth-user", async (req, res) => {
+    try {
+      const { id, email, user_metadata } = req.body;
+      
+      if (!id || !email) {
+        return res.status(400).json({ error: "Missing required user information" });
+      }
+      
+      // Check if user already exists
+      let user = await storage.getUser(parseInt(id));
+      
+      if (!user) {
+        // Create a new user
+        const displayName = user_metadata?.name || email.split('@')[0] || 'User';
+        const avatarInitials = displayName.substring(0, 2).toUpperCase();
+        
+        const userData = {
+          id: parseInt(id),
+          username: email.split('@')[0] || `user_${Date.now()}`,
+          displayName: displayName,
+          avatarInitials: avatarInitials,
+          role: 'Student',
+          level: 'beginner',
+          levelProgress: 0,
+          password: `supabase_${Date.now()}` // Dummy password for storage - authentication is handled by Supabase
+        };
+        
+        user = await storage.createUser(userData);
+        
+        // Return user without password
+        const { password, ...userWithoutPassword } = user;
+        return res.status(201).json(userWithoutPassword);
+      }
+      
+      // User exists, return existing user
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
     } catch (err) {
       handleError(err, res);
     }

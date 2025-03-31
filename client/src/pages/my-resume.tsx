@@ -33,7 +33,10 @@ export default function MyResume() {
   const updateResumeMutation = useMutation({
     mutationFn: async (resumeData: any) => {
       if (!user) throw new Error("You must be logged in to update your resume");
-      return await apiRequest("PATCH", `/api/users/${user.id}/resume`, resumeData);
+      return await apiRequest(`/api/users/${user.id}/resume`, {
+        method: "PATCH",
+        body: JSON.stringify(resumeData)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/users/${user?.id}/resume`] });

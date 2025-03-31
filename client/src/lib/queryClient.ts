@@ -8,16 +8,43 @@ async function throwIfResNotOk(res: Response) {
 }
 
 export async function apiRequest(
-  method: string,
   url: string,
-  data?: unknown | undefined,
+  options?: RequestInit
 ): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+  const defaultOptions: RequestInit = {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+  
+  // Get auth token from Supabase if available
+  try {
+    const { supabase } = await import('./supabase');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      defaultOptions.headers = {
+        ...defaultOptions.headers,
+        'Authorization': `Bearer ${session.access_token}`,
+        'X-User-Id': session.user?.id || ''
+      };
+    }
+  } catch (error) {
+    console.error('Error getting auth token:', error);
+  }
+  
+  const mergedOptions = { ...defaultOptions, ...options };
+  
+  // Make sure headers are properly merged
+  if (options?.headers) {
+    mergedOptions.headers = { 
+      ...defaultOptions.headers, 
+      ...options.headers 
+    };
+  }
+  
+  const res = await fetch(url, mergedOptions);
 
   await throwIfResNotOk(res);
   return res;
@@ -29,8 +56,25 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    // Get auth token from Supabase if available
+    let headers: HeadersInit = {};
+    
+    try {
+      const { supabase } = await import('./supabase');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        headers = {
+          'Authorization': `Bearer ${session.access_token}`,
+          'X-User-Id': session.user?.id || ''
+        };
+      }
+    } catch (error) {
+      console.error('Error getting auth token:', error);
+    }
+    
     const res = await fetch(queryKey[0] as string, {
       credentials: "include",
+      headers
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

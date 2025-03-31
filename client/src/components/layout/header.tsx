@@ -1,9 +1,20 @@
-import { Menu, Bell } from "lucide-react";
+import { Menu, Bell, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/use-auth";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { profile, signOut } = useAuth();
 
   return (
     <>
@@ -21,10 +32,38 @@ export default function Header() {
               <span className="text-primary">OS</span>Resume
             </div>
           </div>
-          <div className="ml-4 flex items-center md:ml-6">
+          <div className="ml-4 flex items-center space-x-4 md:ml-6">
             <button type="button" className="p-1 rounded-full text-gray-400 hover:text-gray-500">
               <Bell className="h-6 w-6" />
             </button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                  <span className="sr-only">Open user menu</span>
+                  <Avatar className="h-8 w-8 rounded-full">
+                    <AvatarFallback className="bg-primary text-white">
+                      {profile?.avatarInitials || profile?.displayName?.charAt(0) || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="font-medium">{profile?.displayName}</div>
+                  <div className="text-xs text-muted-foreground truncate">{profile?.role || 'Student'}</div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -48,7 +87,25 @@ export default function Header() {
               </button>
             </div>
             <nav className="pt-3 pb-4 overflow-y-auto">
-              <div className="px-4 pb-2">
+              {profile && (
+                <div className="px-4 py-3 border-b border-gray-200">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <Avatar className="h-10 w-10 rounded-full">
+                        <AvatarFallback className="bg-primary text-white">
+                          {profile?.avatarInitials || profile?.displayName?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <div className="ml-3">
+                      <div className="font-medium text-gray-800">{profile.displayName}</div>
+                      <div className="text-xs text-gray-500">{profile.role || 'Student'}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            
+              <div className="px-4 pb-2 pt-4">
                 <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</h2>
               </div>
               <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
@@ -103,6 +160,19 @@ export default function Header() {
                   Help Center
                 </a>
               </Link>
+              
+              <div className="border-t border-gray-200 mt-5 pt-4">
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    signOut();
+                  }}
+                  className="flex items-center px-4 py-2.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 w-full"
+                >
+                  <LogOut className="h-5 w-5 mr-3" />
+                  Sign out
+                </button>
+              </div>
             </nav>
           </div>
         </div>

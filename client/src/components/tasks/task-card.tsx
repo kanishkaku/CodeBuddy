@@ -45,9 +45,12 @@ export default function TaskCard({ task }: TaskCardProps) {
     mutationFn: async () => {
       if (!user) throw new Error("You must be logged in to save tasks");
       setSaving(true);
-      await apiRequest("POST", "/api/saved-tasks", {
-        userId: user.id,
-        taskId: task.id,
+      await apiRequest("/api/saved-tasks", {
+        method: "POST",
+        body: JSON.stringify({
+          userId: user.id,
+          taskId: task.id,
+        })
       });
     },
     onSuccess: () => {
@@ -74,7 +77,9 @@ export default function TaskCard({ task }: TaskCardProps) {
     mutationFn: async () => {
       if (!user) throw new Error("You must be logged in to remove saved tasks");
       setSaving(true);
-      await apiRequest("DELETE", `/api/users/${user.id}/saved-tasks/${task.id}`, undefined);
+      await apiRequest(`/api/users/${user.id}/saved-tasks/${task.id}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/users/${user?.id}/saved-tasks`] });
@@ -101,11 +106,14 @@ export default function TaskCard({ task }: TaskCardProps) {
       if (!user) throw new Error("You must be logged in to mark tasks as completed");
       setCompleting(true);
       // Create a contribution record
-      await apiRequest("POST", "/api/contributions", {
-        userId: user.id,
-        taskId: task.id,
-        pullRequestUrl,
-        description
+      await apiRequest("/api/contributions", {
+        method: "POST",
+        body: JSON.stringify({
+          userId: user.id,
+          taskId: task.id,
+          pullRequestUrl,
+          description
+        })
       });
     },
     onSuccess: () => {

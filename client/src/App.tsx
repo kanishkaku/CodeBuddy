@@ -9,8 +9,10 @@ import MyResume from "@/pages/my-resume";
 import SavedTasks from "@/pages/saved-tasks";
 import LearningCenter from "@/pages/learning-center";
 import HelpCenter from "@/pages/help-center";
+import Login from "@/pages/login";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -29,8 +31,36 @@ function Layout({ children }: { children: React.ReactNode }) {
 }
 
 function Router() {
+  const { user, profile, isLoading } = useAuth()
+  
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+  
+  // If not logged in, only show login page
+  if (!user || !profile) {
+    return (
+      <Switch>
+        <Route path="/login">
+          <Login />
+        </Route>
+        <Route>
+          <Login />
+        </Route>
+      </Switch>
+    )
+  }
+  
+  // For authenticated users, show normal routes
   return (
     <Switch>
+      <Route path="/login">
+        <Login />
+      </Route>
       <Route path="/">
         <Layout>
           <Dashboard />
@@ -71,8 +101,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
