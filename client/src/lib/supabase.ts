@@ -1,29 +1,22 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Try to get Supabase credentials from different environment variable formats
-const supabaseUrl = 
-  import.meta.env.VITE_SUPABASE_URL || 
-  import.meta.env.SUPABASE_URL || 
-  ''
+// Create a simple Supabase client with environment variables
+// Since we've moved the .env file to the client directory, Vite should pick it up
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-const supabaseAnonKey = 
-  import.meta.env.VITE_SUPABASE_ANON_KEY || 
-  import.meta.env.SUPABASE_ANON_KEY || 
-  ''
-
-// For development without Supabase, use a fallback if credentials are missing
-const FALLBACK_URL = 'https://example.supabase.co'
-const FALLBACK_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE2ODQxODk0MDB9.gDJedGmfaDnVuyGAo3BxzK9io00y3H1QBRqkjT_JaGI'
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Using fallback Supabase credentials. Authentication features will be limited.')
+// Print the first few characters of the URL to verify (without exposing full credentials)
+if (supabaseUrl && typeof supabaseUrl === 'string') {
+  console.log(`Supabase URL found (starts with: ${supabaseUrl.substring(0, 8)}...)`)
 }
 
-// Use real credentials if available, otherwise use fallbacks for development
-export const supabase = createClient(
-  supabaseUrl || FALLBACK_URL,
-  supabaseAnonKey || FALLBACK_KEY
+// Create the client with proper type checking
+const supabase = createClient(
+  supabaseUrl ? String(supabaseUrl) : '', 
+  supabaseAnonKey ? String(supabaseAnonKey) : ''
 )
+
+export { supabase }
 
 export type Profile = {
   id: string
