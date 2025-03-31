@@ -28,34 +28,17 @@ export type Profile = {
   levelProgress: number
 }
 
-// Function to get user profile
+// These functions are no longer used as they require a Supabase profiles table
+// Instead, we're using our backend to manage user profiles
+
+// Function to get user profile (deprecated - not used)
 export async function getUserProfile(userId: string): Promise<Profile | null> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single()
-  
-  if (error || !data) {
-    console.error('Error fetching user profile:', error)
-    return null
-  }
-  
-  return data
+  console.warn('getUserProfile is deprecated. Use backend API instead.')
+  return null;
 }
 
-// Function to create or update user profile
+// Function to create or update user profile (deprecated - not used)
 export async function upsertUserProfile(profile: Partial<Profile> & { id: string }): Promise<Profile | null> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .upsert(profile)
-    .select()
-    .single()
-  
-  if (error) {
-    console.error('Error upserting profile:', error)
-    return null
-  }
-  
-  return data
+  console.warn('upsertUserProfile is deprecated. Use backend API instead.')
+  return null;
 }

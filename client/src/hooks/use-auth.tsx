@@ -39,9 +39,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsLoading(true)
           
           try {
-            // Fetch user profile from Supabase
-            const userProfile = await getUserProfile(currentSession.user.id)
-            
             // Sync user with our backend server
             const userData = {
               id: currentSession.user.id,
@@ -50,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
             
             // Send user data to our backend to create/sync user
-            await apiRequest('/api/supabase-auth-user', {
+            const response = await apiRequest('/api/supabase-auth-user', {
               method: 'POST',
               body: JSON.stringify(userData),
               headers: {
@@ -58,28 +55,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             })
             
-            if (!userProfile) {
-              // Create a new profile for first-time users
-              const email = currentSession.user.email || ''
-              const displayName = currentSession.user.user_metadata?.name || email.split('@')[0] || 'User'
-              const initials = displayName.substring(0, 2).toUpperCase()
-              
-              const newProfile = {
-                id: currentSession.user.id,
-                username: email.split('@')[0] || `user_${Date.now()}`,
-                displayName: displayName,
-                avatarInitials: initials,
-                role: 'Student',
-                level: 'beginner',
-                levelProgress: 0
+            // Use the response from our backend API as the profile
+            // This avoids depending on Supabase's profiles table
+            if (response) {
+              try {
+                const backendUser = await response.json();
+                
+                // Convert backend user to our Profile type
+                const userProfile: Profile = {
+                  id: currentSession.user.id,
+                  username: backendUser.username || '',
+                  displayName: backendUser.displayName || '',
+                  avatarInitials: backendUser.avatarInitials || '',
+                  role: backendUser.role || 'Student',
+                  level: backendUser.level || 'beginner',
+                  levelProgress: backendUser.levelProgress || 0
+                };
+                
+                setProfile(userProfile);
+              } catch (error) {
+                console.error('Error parsing user profile from backend:', error);
               }
-              
-              const createdProfile = await upsertUserProfile(newProfile)
-              if (createdProfile) {
-                setProfile(createdProfile)
-              }
-            } else {
-              setProfile(userProfile)
             }
           } catch (error) {
             console.error('Error syncing user data:', error)
@@ -113,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           
           // Send user data to our backend to create/sync user
-          await apiRequest('/api/supabase-auth-user', {
+          const response = await apiRequest('/api/supabase-auth-user', {
             method: 'POST',
             body: JSON.stringify(userData),
             headers: {
@@ -121,8 +117,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           })
           
-          const userProfile = await getUserProfile(data.session.user.id)
-          setProfile(userProfile)
+          // Use the response from our backend API as the profile
+          if (response) {
+            try {
+              const backendUser = await response.json();
+              
+              // Convert backend user to our Profile type
+              const userProfile: Profile = {
+                id: data.session.user.id,
+                username: backendUser.username || '',
+                displayName: backendUser.displayName || '',
+                avatarInitials: backendUser.avatarInitials || '',
+                role: backendUser.role || 'Student',
+                level: backendUser.level || 'beginner',
+                levelProgress: backendUser.levelProgress || 0
+              };
+              
+              setProfile(userProfile);
+            } catch (error) {
+              console.error('Error parsing user profile from backend:', error);
+            }
+          }
         }
       } catch (error) {
         console.error('Error during authentication initialization:', error)
