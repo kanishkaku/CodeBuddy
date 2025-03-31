@@ -61,7 +61,7 @@ export const contributions = pgTable("contributions", {
 export const insertContributionSchema = createInsertSchema(contributions)
   .extend({
     taskId: z.number(),
-    pullRequestUrl: z.string().optional(),
+    pullRequestUrl: z.string().url(),
   })
   .omit({
     id: true,
