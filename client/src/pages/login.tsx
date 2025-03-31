@@ -5,16 +5,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
-import { SiGithub } from 'react-icons/si'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function Login() {
-  const { user, profile, signInWithGitHub, signInWithEmailPassword, signUpWithEmailPassword, isLoading } = useAuth()
+  const { user, profile, signInWithEmailPassword, signUpWithEmailPassword, isLoading } = useAuth()
   const [, setLocation] = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
-  const [showEmailForms, setShowEmailForms] = useState(false)
   const [activeTab, setActiveTab] = useState('signin')
 
   // Redirect to dashboard if already logged in
@@ -45,135 +43,93 @@ export default function Login() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-4">
-            <Button 
-              onClick={signInWithGitHub}
-              className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white hover:bg-gray-700"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white"></div>
-              ) : (
-                <>
-                  <SiGithub className="h-5 w-5" />
-                  Sign in with GitHub
-                </>
-              )}
-            </Button>
-            
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="mx-4 flex-shrink text-xs text-gray-500">OR</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-            
-            {!showEmailForms ? (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => setShowEmailForms(true)}
-              >
-                Continue with Email
-              </Button>
-            ) : (
-              <Tabs defaultValue="signin" value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="signin">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="signin">
-                  <form onSubmit={handleSignIn} className="space-y-3 pt-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="signin-email">Email</Label>
-                      <Input 
-                        id="signin-email" 
-                        type="email" 
-                        placeholder="youremail@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signin-password">Password</Label>
-                      <Input 
-                        id="signin-password" 
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? 'Signing in...' : 'Sign in'}
-                    </Button>
-                  </form>
-                </TabsContent>
-                
-                <TabsContent value="signup">
-                  <form onSubmit={handleSignUp} className="space-y-3 pt-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name">Full Name</Label>
-                      <Input 
-                        id="signup-name" 
-                        type="text" 
-                        placeholder="John Doe"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
-                      <Input 
-                        id="signup-email" 
-                        type="email" 
-                        placeholder="youremail@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
-                      <Input 
-                        id="signup-password" 
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        minLength={8}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Password must be at least 8 characters
-                      </p>
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? 'Creating account...' : 'Sign up'}
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            )}
-            
-            {showEmailForms && (
-              <Button
-                type="button"
-                variant="link"
-                className="w-full text-xs text-gray-500"
-                onClick={() => setShowEmailForms(false)}
-              >
-                Back to options
-              </Button>
-            )}
+            <Tabs defaultValue="signin" value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="signin">
+                <form onSubmit={handleSignIn} className="space-y-3 pt-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
+                    <Input 
+                      id="signin-email" 
+                      type="email" 
+                      placeholder="youremail@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <Input 
+                      id="signin-password" 
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Signing in...' : 'Sign in'}
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="signup">
+                <form onSubmit={handleSignUp} className="space-y-3 pt-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Input 
+                      id="signup-name" 
+                      type="text" 
+                      placeholder="John Doe"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input 
+                      id="signup-email" 
+                      type="email" 
+                      placeholder="youremail@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input 
+                      id="signup-password" 
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Password must be at least 8 characters
+                    </p>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Creating account...' : 'Sign up'}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
           </div>
         </CardContent>
         <CardFooter className="text-xs text-center text-gray-500">

@@ -14,7 +14,6 @@ interface AuthContextType {
   profile: Profile | null 
   session: Session | null
   isLoading: boolean
-  signInWithGitHub: () => Promise<void>
   signInWithEmailPassword: (email: string, password: string) => Promise<void>
   signUpWithEmailPassword: (email: string, password: string, displayName: string) => Promise<void>
   signOut: () => Promise<void>
@@ -139,33 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const signInWithGitHub = async () => {
-    try {
-      console.log('Attempting GitHub sign in, redirect URL:', window.location.origin);
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
-        options: {
-          redirectTo: window.location.origin
-        }
-      })
-      
-      if (error) {
-        console.error('GitHub OAuth error details:', error);
-        throw error;
-      }
-      
-      console.log('GitHub OAuth initiated successfully, redirect data:', data);
-    } catch (error: unknown) {
-      const authError = error as AuthError
-      console.error('Error signing in with GitHub:', authError)
-      toast({
-        title: 'Authentication error',
-        description: `Failed to sign in with GitHub: ${authError.message}`,
-        variant: 'destructive',
-      })
-    }
-  }
+  // GitHub sign-in method has been removed
   
   const signInWithEmailPassword = async (email: string, password: string) => {
     try {
@@ -260,7 +233,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     session,
     isLoading,
-    signInWithGitHub,
     signInWithEmailPassword,
     signUpWithEmailPassword,
     signOut
