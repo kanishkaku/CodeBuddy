@@ -50,7 +50,9 @@ export const contributions = pgTable("contributions", {
   description: text("description"),
 });
 
-export const insertContributionSchema = createInsertSchema(contributions).omit({
+export const insertContributionSchema = createInsertSchema(contributions).extend({
+  taskId: z.number().or(z.bigint())
+}).omit({
   id: true,
 });
 
