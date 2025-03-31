@@ -51,7 +51,7 @@ export const contributions = pgTable("contributions", {
 });
 
 export const insertContributionSchema = createInsertSchema(contributions).extend({
-  taskId: z.number().or(z.bigint())
+  taskId: z.number().or(z.string().transform(val => BigInt(val))).transform(val => Number(val))
 }).omit({
   id: true,
 });
