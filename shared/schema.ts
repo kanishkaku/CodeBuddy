@@ -44,7 +44,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 export const contributions = pgTable("contributions", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
-  taskId: integer("task_id", { mode: "bigint" }).notNull(),
+  taskId: bigint("task_id", { mode: "number" }).notNull(),
   completedAt: timestamp("completed_at").defaultNow().notNull(),
   pullRequestUrl: text("pull_request_url"),
   description: text("description"),
