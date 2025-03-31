@@ -1,4 +1,12 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  json,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -44,18 +52,20 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 export const contributions = pgTable("contributions", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
-  taskId: bigint("task_id", { mode: "number" }).notNull(),
+  taskId: integer("task_id").notNull(),
   completedAt: timestamp("completed_at").defaultNow().notNull(),
   pullRequestUrl: text("pull_request_url"),
   description: text("description"),
 });
 
-export const insertContributionSchema = createInsertSchema(contributions).extend({
-  taskId: z.number(),
-  pullRequestUrl: z.string().optional()
-}).omit({
-  id: true,
-});
+export const insertContributionSchema = createInsertSchema(contributions)
+  .extend({
+    taskId: z.number(),
+    pullRequestUrl: z.string().optional(),
+  })
+  .omit({
+    id: true,
+  });
 
 // Saved tasks (bookmarks)
 export const savedTasks = pgTable("saved_tasks", {

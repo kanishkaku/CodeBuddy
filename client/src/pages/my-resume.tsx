@@ -216,7 +216,9 @@ export default function MyResume() {
                     {contributions.map((contribution: any) => (
                       <div key={contribution.id} className="border-l-2 border-primary pl-4">
                         <h3 className="font-medium">
-                          {contribution.task.projectName}: {contribution.task.title}
+                          {contribution.task && contribution.task.projectName ? 
+                            `${contribution.task.projectName}: ${contribution.task.title}` : 
+                            'Contributed Task'}
                         </h3>
                         <p className="text-sm text-gray-600 mb-1">{contribution.description}</p>
                         <div className="flex items-center text-xs text-gray-500">
@@ -447,7 +449,9 @@ export default function MyResume() {
                   {contributions.map((contribution: any) => (
                     <div key={contribution.id} className="border-l-2 border-primary pl-4">
                       <h3 className="font-medium">
-                        {contribution.task.projectName}: {contribution.task.title}
+                        {contribution.task && contribution.task.projectName ? 
+                          `${contribution.task.projectName}: ${contribution.task.title}` : 
+                          'Contributed Task'}
                       </h3>
                       <p className="text-sm text-gray-600 mb-1">{contribution.description}</p>
                       <div className="flex items-center text-xs text-gray-500">
