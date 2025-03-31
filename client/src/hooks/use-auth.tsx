@@ -14,7 +14,8 @@ interface AuthContextType {
   profile: Profile | null 
   session: Session | null
   isLoading: boolean
-  signInWithGoogle: () => Promise<void>
+  signInWithGitHub: () => Promise<void>
+  signInWithEmailPassword: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -137,15 +138,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const signInWithGoogle = async () => {
+  const signInWithGitHub = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: 'github',
         options: {
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
           redirectTo: window.location.origin
         }
       })
@@ -153,10 +150,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error
     } catch (error: unknown) {
       const authError = error as AuthError
-      console.error('Error signing in with Google:', authError)
+      console.error('Error signing in with GitHub:', authError)
       toast({
         title: 'Authentication error',
-        description: authError.message || 'Failed to sign in with Google',
+        description: authError.message || 'Failed to sign in with GitHub',
+        variant: 'destructive',
+      })
+    }
+  }
+  
+  const signInWithEmailPassword = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+      
+      if (error) throw error
+    } catch (error: unknown) {
+      const authError = error as AuthError
+      console.error('Error signing in with email/password:', authError)
+      toast({
+        title: 'Authentication error',
+        description: authError.message || 'Failed to sign in with email/password',
         variant: 'destructive',
       })
     }
@@ -187,12 +203,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const value = {
+  // Make sure the value object matches the interface exactly
+  const value: AuthContextType = {
     user,
     profile,
     session,
     isLoading,
-    signInWithGoogle,
+    signInWithGitHub,
+    signInWithEmailPassword,
     signOut
   }
 
