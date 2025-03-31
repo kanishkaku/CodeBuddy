@@ -218,7 +218,7 @@ export default function MyResume() {
                         <h3 className="font-medium">
                           {contribution.task && contribution.task.projectName ? 
                             `${contribution.task.projectName}: ${contribution.task.title}` : 
-                            'Contributed Task'}
+                            (contribution.description || 'Contributed to Open Source Task')}
                         </h3>
                         <p className="text-sm text-gray-600 mb-1">{contribution.description}</p>
                         <div className="flex items-center text-xs text-gray-500">
@@ -451,7 +451,7 @@ export default function MyResume() {
                       <h3 className="font-medium">
                         {contribution.task && contribution.task.projectName ? 
                           `${contribution.task.projectName}: ${contribution.task.title}` : 
-                          'Contributed Task'}
+                          (contribution.description || 'Contributed to Open Source Task')}
                       </h3>
                       <p className="text-sm text-gray-600 mb-1">{contribution.description}</p>
                       <div className="flex items-center text-xs text-gray-500">

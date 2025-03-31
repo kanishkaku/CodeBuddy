@@ -184,6 +184,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/contributions", async (req, res) => {
     try {
       const contributionData = insertContributionSchema.parse(req.body);
+      
+      // Check if the task exists in our database
+      let task = await storage.getTask(contributionData.taskId);
+      
+      // If this is a task from GitHub API and not in our database yet,
+      // we need to add it to our database so it can be properly linked
+      if (!task && contributionData.taskId > 1000000) {  // Using a large number as a heuristic for external IDs
+        // Try to fetch any additional task data from the request
+        const taskData = req.body.taskData || {};
+        
+        // Create a minimal task entry
+        const newTask = {
+          id: contributionData.taskId,
+          title: taskData.title || "External GitHub Task",
+          description: taskData.description || "A task from GitHub",
+          projectName: taskData.projectName || "GitHub Project",
+          projectImageUrl: taskData.projectImageUrl || null,
+          difficulty: taskData.difficulty || "intermediate",
+          estimatedHours: taskData.estimatedHours || "Unknown",
+          tags: taskData.tags || ["github"],
+          link: taskData.link || contributionData.pullRequestUrl || "https://github.com",
+          createdAt: new Date()
+        };
+        
+        // Add the task to our database
+        await storage.createTaskWithId(newTask);
+      }
+      
       const contribution = await storage.createContribution(contributionData);
       res.status(201).json(contribution);
     } catch (err) {

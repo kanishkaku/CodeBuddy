@@ -21,9 +21,10 @@ export interface IStorage {
   getTasksByDifficulty(difficulty: string): Promise<Task[]>;
   getTasksByTags(tags: string[]): Promise<Task[]>;
   createTask(task: InsertTask): Promise<Task>;
+  createTaskWithId(task: Task): Promise<Task>;
 
   // Contribution operations
-  getUserContributions(userId: number): Promise<(Contribution & { task: Task })[]>;
+  getUserContributions(userId: number): Promise<(Contribution & { task?: Task })[]>;
   createContribution(contribution: InsertContribution): Promise<Contribution>;
   getContribution(id: number): Promise<Contribution | undefined>;
 
@@ -133,16 +134,29 @@ export class MemStorage implements IStorage {
     this.tasks.set(id, task);
     return task;
   }
+  
+  // Special method to create a task with a specific ID (for external tasks)
+  async createTaskWithId(task: Task): Promise<Task> {
+    this.tasks.set(task.id, task);
+    // Update task counter if needed
+    if (task.id >= this.taskIdCounter) {
+      this.taskIdCounter = task.id + 1;
+    }
+    return task;
+  }
 
   // Contribution operations
-  async getUserContributions(userId: number): Promise<(Contribution & { task: Task })[]> {
+  async getUserContributions(userId: number): Promise<(Contribution & { task?: Task })[]> {
     const userContributions = Array.from(this.contributions.values()).filter(
       (contribution) => contribution.userId === userId,
     );
     
     return userContributions.map(contribution => {
-      const task = this.tasks.get(contribution.taskId)!;
-      return { ...contribution, task };
+      const task = this.tasks.get(contribution.taskId);
+      return { 
+        ...contribution, 
+        task: task || undefined 
+      };
     });
   }
 
