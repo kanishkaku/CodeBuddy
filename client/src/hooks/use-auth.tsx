@@ -16,6 +16,7 @@ interface AuthContextType {
   isLoading: boolean
   signInWithGitHub: () => Promise<void>
   signInWithEmailPassword: (email: string, password: string) => Promise<void>
+  signUpWithEmailPassword: (email: string, password: string, displayName: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -177,6 +178,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
     }
   }
+  
+  const signUpWithEmailPassword = async (email: string, password: string, displayName: string) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: displayName
+          }
+        }
+      })
+      
+      if (error) throw error
+      
+      toast({
+        title: 'Account created',
+        description: 'Please check your email to confirm your account.',
+      })
+    } catch (error: unknown) {
+      const authError = error as AuthError
+      console.error('Error signing up:', authError)
+      toast({
+        title: 'Sign up error',
+        description: authError.message || 'Failed to create account',
+        variant: 'destructive',
+      })
+    }
+  }
 
   const signOut = async () => {
     try {
@@ -211,6 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     signInWithGitHub,
     signInWithEmailPassword,
+    signUpWithEmailPassword,
     signOut
   }
 

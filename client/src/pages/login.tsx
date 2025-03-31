@@ -6,13 +6,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
 import { SiGithub } from 'react-icons/si'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function Login() {
-  const { user, profile, signInWithGitHub, signInWithEmailPassword, isLoading } = useAuth()
+  const { user, profile, signInWithGitHub, signInWithEmailPassword, signUpWithEmailPassword, isLoading } = useAuth()
   const [, setLocation] = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showEmailLogin, setShowEmailLogin] = useState(false)
+  const [displayName, setDisplayName] = useState('')
+  const [showEmailForms, setShowEmailForms] = useState(false)
+  const [activeTab, setActiveTab] = useState('signin')
 
   // Redirect to dashboard if already logged in
   useEffect(() => {
@@ -21,9 +24,14 @@ export default function Login() {
     }
   }, [user, profile, isLoading, setLocation])
 
-  const handleEmailLogin = (e: React.FormEvent) => {
+  const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault()
     signInWithEmailPassword(email, password)
+  }
+
+  const handleSignUp = (e: React.FormEvent) => {
+    e.preventDefault()
+    signUpWithEmailPassword(email, password, displayName)
   }
 
   return (
@@ -32,7 +40,7 @@ export default function Login() {
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-bold tracking-tight">Welcome to OSResume</CardTitle>
           <CardDescription className="text-base">
-            Sign in to build your resume with open source contributions
+            Build your resume with open source contributions
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -58,52 +66,112 @@ export default function Login() {
               <div className="flex-grow border-t border-gray-300"></div>
             </div>
             
-            {showEmailLogin ? (
-              <form onSubmit={handleEmailLogin} className="space-y-3">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="youremail@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input 
-                    id="password" 
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Signing in...' : 'Sign in'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="link"
-                  className="w-full text-xs text-gray-500"
-                  onClick={() => setShowEmailLogin(false)}
-                >
-                  Back to options
-                </Button>
-              </form>
-            ) : (
+            {!showEmailForms ? (
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => setShowEmailLogin(true)}
+                onClick={() => setShowEmailForms(true)}
               >
-                Sign in with Email
+                Continue with Email
+              </Button>
+            ) : (
+              <Tabs defaultValue="signin" value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="signin">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="signin">
+                  <form onSubmit={handleSignIn} className="space-y-3 pt-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-email">Email</Label>
+                      <Input 
+                        id="signin-email" 
+                        type="email" 
+                        placeholder="youremail@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-password">Password</Label>
+                      <Input 
+                        id="signin-password" 
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Signing in...' : 'Sign in'}
+                    </Button>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="signup">
+                  <form onSubmit={handleSignUp} className="space-y-3 pt-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-name">Full Name</Label>
+                      <Input 
+                        id="signup-name" 
+                        type="text" 
+                        placeholder="John Doe"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">Email</Label>
+                      <Input 
+                        id="signup-email" 
+                        type="email" 
+                        placeholder="youremail@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password</Label>
+                      <Input 
+                        id="signup-password" 
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={8}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Password must be at least 8 characters
+                      </p>
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Creating account...' : 'Sign up'}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            )}
+            
+            {showEmailForms && (
+              <Button
+                type="button"
+                variant="link"
+                className="w-full text-xs text-gray-500"
+                onClick={() => setShowEmailForms(false)}
+              >
+                Back to options
               </Button>
             )}
           </div>
