@@ -40,8 +40,12 @@ function Router() {
       <Route path="/login">
         <Login />
       </Route>
-      <Route path="/">
+      <Route path="/app">
         <Landing />
+      </Route>
+      <Route path="/">
+        {/* Redirect to login page */}
+        <Login />
       </Route>
       <Route>
         <NotFound />
