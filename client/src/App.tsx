@@ -102,8 +102,17 @@ function Router() {
     </Switch>
   );
   
-  // Show loading state only when checking authentication for protected routes
-  if (isLoading) {
+  // Only show loading state when initially checking authentication
+  // but not during navigation between routes
+  const initialLoadingRef = React.useRef(true);
+  
+  React.useEffect(() => {
+    if (!isLoading) {
+      initialLoadingRef.current = false;
+    }
+  }, [isLoading]);
+  
+  if (isLoading && initialLoadingRef.current) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>

@@ -6,9 +6,11 @@ import {
   boolean,
   timestamp,
   json,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // User schema
 export const users = pgTable("users", {
@@ -30,6 +32,16 @@ export const insertUserSchema = createInsertSchema(users).pick({
   avatarInitials: true,
 });
 
+// User relations
+export const usersRelations = relations(users, ({ many, one }) => ({
+  contributions: many(contributions),
+  savedTasks: many(savedTasks),
+  resume: one(resumes, {
+    fields: [users.id],
+    references: [resumes.userId],
+  }),
+}));
+
 // Task schema
 export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
@@ -48,11 +60,17 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
 });
 
+// Task relations
+export const tasksRelations = relations(tasks, ({ many }) => ({
+  contributions: many(contributions),
+  savedBy: many(savedTasks),
+}));
+
 // User contributions (completed tasks)
 export const contributions = pgTable("contributions", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  taskId: integer("task_id").notNull(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  taskId: integer("task_id").notNull().references(() => tasks.id, { onDelete: 'cascade' }),
   completedAt: timestamp("completed_at").defaultNow().notNull(),
   pullRequestUrl: text("pull_request_url"),
   description: text("description"),
@@ -67,11 +85,23 @@ export const insertContributionSchema = createInsertSchema(contributions)
     id: true,
   });
 
+// Contribution relations
+export const contributionsRelations = relations(contributions, ({ one }) => ({
+  user: one(users, {
+    fields: [contributions.userId],
+    references: [users.id],
+  }),
+  task: one(tasks, {
+    fields: [contributions.taskId],
+    references: [tasks.id],
+  }),
+}));
+
 // Saved tasks (bookmarks)
 export const savedTasks = pgTable("saved_tasks", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  taskId: integer("task_id").notNull(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  taskId: integer("task_id").notNull().references(() => tasks.id, { onDelete: 'cascade' }),
   savedAt: timestamp("saved_at").defaultNow().notNull(),
 });
 
@@ -79,6 +109,18 @@ export const insertSavedTaskSchema = createInsertSchema(savedTasks).omit({
   id: true,
   savedAt: true,
 });
+
+// Saved tasks relations
+export const savedTasksRelations = relations(savedTasks, ({ one }) => ({
+  user: one(users, {
+    fields: [savedTasks.userId],
+    references: [users.id],
+  }),
+  task: one(tasks, {
+    fields: [savedTasks.taskId],
+    references: [tasks.id],
+  }),
+}));
 
 // Learning resources
 export const resources = pgTable("resources", {
@@ -97,7 +139,7 @@ export const insertResourceSchema = createInsertSchema(resources).omit({
 // Resume schema
 export const resumes = pgTable("resumes", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().unique(),
+  userId: integer("user_id").notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
   personalInfo: json("personal_info").notNull(),
   skills: text("skills").array(),
   education: json("education").array(),
@@ -110,6 +152,14 @@ export const resumes = pgTable("resumes", {
 export const insertResumeSchema = createInsertSchema(resumes).omit({
   id: true,
 });
+
+// Resume relations
+export const resumesRelations = relations(resumes, ({ one }) => ({
+  user: one(users, {
+    fields: [resumes.userId],
+    references: [users.id],
+  }),
+}));
 
 // Type exports
 export type User = typeof users.$inferSelect;
