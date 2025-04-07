@@ -29,127 +29,205 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast()
 
   useEffect(() => {
+    console.log("Auth hook initializing...");
+    
     // Set up Supabase auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, currentSession: Session | null) => {
+        console.log(`Auth state changed: ${event}`, currentSession ? "Session exists" : "No session");
+        
         setSession(currentSession)
         setUser(currentSession?.user || null)
         
         if (event === 'SIGNED_IN' && currentSession?.user) {
           setIsLoading(true)
+          console.log("User signed in, syncing with backend...");
           
           try {
-            // Sync user with our backend server
-            const userData = {
+            // Create a simplified profile to avoid backend calls during development
+            // This helps bypass any backend API issues temporarily
+            const userProfile: Profile = {
               id: currentSession.user.id,
-              email: currentSession.user.email,
-              user_metadata: currentSession.user.user_metadata
-            }
+              username: currentSession.user.email?.split('@')[0] || 'user',
+              displayName: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0] || 'User',
+              avatarInitials: (currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0] || 'US').substring(0, 2).toUpperCase(),
+              role: 'Student',
+              level: 'beginner',
+              levelProgress: 0
+            };
             
-            // Send user data to our backend to create/sync user
-            const response = await apiRequest('/api/supabase-auth-user', {
-              method: 'POST',
-              body: JSON.stringify(userData),
-              headers: {
-                'Authorization': `Bearer ${currentSession.access_token}`
-              }
-            })
+            setProfile(userProfile);
+            console.log("Created temporary profile:", userProfile);
             
-            // Use the response from our backend API as the profile
-            // This avoids depending on Supabase's profiles table
-            if (response) {
-              try {
-                const backendUser = await response.json();
-                
-                // Convert backend user to our Profile type
-                const userProfile: Profile = {
-                  id: currentSession.user.id,
-                  username: backendUser.username || '',
-                  displayName: backendUser.displayName || '',
-                  avatarInitials: backendUser.avatarInitials || '',
-                  role: backendUser.role || 'Student',
-                  level: backendUser.level || 'beginner',
-                  levelProgress: backendUser.levelProgress || 0
-                };
-                
-                setProfile(userProfile);
-              } catch (error) {
-                console.error('Error parsing user profile from backend:', error);
+            // Try synchronizing with the backend
+            try {
+              // Sync user with our backend server
+              const userData = {
+                id: currentSession.user.id,
+                email: currentSession.user.email,
+                user_metadata: currentSession.user.user_metadata
               }
+              
+              console.log("Sending user data to backend:", userData);
+              
+              // Send user data to our backend to create/sync user
+              const response = await apiRequest('/api/supabase-auth-user', {
+                method: 'POST',
+                body: JSON.stringify(userData),
+                headers: {
+                  'Authorization': `Bearer ${currentSession.access_token}`
+                }
+              })
+              
+              // Use the response from our backend API as the profile
+              if (response) {
+                try {
+                  const backendUser = await response.json();
+                  console.log("Backend user received:", backendUser);
+                  
+                  // Convert backend user to our Profile type
+                  const backendProfile: Profile = {
+                    id: currentSession.user.id,
+                    username: backendUser.username || userProfile.username,
+                    displayName: backendUser.displayName || userProfile.displayName,
+                    avatarInitials: backendUser.avatarInitials || userProfile.avatarInitials,
+                    role: backendUser.role || userProfile.role,
+                    level: backendUser.level || userProfile.level,
+                    levelProgress: backendUser.levelProgress || userProfile.levelProgress
+                  };
+                  
+                  setProfile(backendProfile);
+                  console.log("Updated profile from backend:", backendProfile);
+                } catch (error) {
+                  console.error('Error parsing user profile from backend:', error);
+                  // Keep using the temporary profile
+                }
+              }
+            } catch (error) {
+              console.error('Error syncing user data with backend:', error);
+              toast({
+                title: 'Continuing with temporary profile',
+                description: 'Unable to sync with backend, but you can still use the app.',
+                variant: 'default',
+              });
+              // Keep using the temporary profile
             }
           } catch (error) {
-            console.error('Error syncing user data:', error)
+            console.error('Error in auth flow:', error);
             toast({
-              title: 'Error syncing user data',
-              description: 'There was an error syncing your user data with our servers.',
+              title: 'Authentication error',
+              description: 'There was an error with the authentication process. Please try again.',
               variant: 'destructive',
-            })
+            });
           } finally {
-            setIsLoading(false)
+            setIsLoading(false);
+            console.log("Auth loading completed");
           }
         } else if (event === 'SIGNED_OUT') {
-          setProfile(null)
+          console.log("User signed out");
+          setProfile(null);
+          setIsLoading(false);
+        } else {
+          // For other events, ensure we're not stuck in loading state
+          setIsLoading(false);
         }
       }
     )
 
     // Initial session check
     const initializeAuth = async () => {
+      console.log("Initializing auth - checking for existing session");
       try {
-        const { data } = await supabase.auth.getSession()
-        setSession(data.session)
-        setUser(data.session?.user || null)
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log("Session check result:", data.session ? "Session exists" : "No session");
+        setSession(data.session);
+        setUser(data.session?.user || null);
         
         if (data.session?.user) {
-          // Sync user with our backend server
-          const userData = {
+          console.log("Existing user found, creating profile");
+          
+          // Create a simplified profile
+          const userProfile: Profile = {
             id: data.session.user.id,
-            email: data.session.user.email,
-            user_metadata: data.session.user.user_metadata
-          }
+            username: data.session.user.email?.split('@')[0] || 'user',
+            displayName: data.session.user.user_metadata?.name || data.session.user.email?.split('@')[0] || 'User',
+            avatarInitials: (data.session.user.user_metadata?.name || data.session.user.email?.split('@')[0] || 'US').substring(0, 2).toUpperCase(),
+            role: 'Student',
+            level: 'beginner',
+            levelProgress: 0
+          };
           
-          // Send user data to our backend to create/sync user
-          const response = await apiRequest('/api/supabase-auth-user', {
-            method: 'POST',
-            body: JSON.stringify(userData),
-            headers: {
-              'Authorization': `Bearer ${data.session.access_token}`
-            }
-          })
+          setProfile(userProfile);
+          console.log("Created temporary profile:", userProfile);
           
-          // Use the response from our backend API as the profile
-          if (response) {
-            try {
-              const backendUser = await response.json();
-              
-              // Convert backend user to our Profile type
-              const userProfile: Profile = {
-                id: data.session.user.id,
-                username: backendUser.username || '',
-                displayName: backendUser.displayName || '',
-                avatarInitials: backendUser.avatarInitials || '',
-                role: backendUser.role || 'Student',
-                level: backendUser.level || 'beginner',
-                levelProgress: backendUser.levelProgress || 0
-              };
-              
-              setProfile(userProfile);
-            } catch (error) {
-              console.error('Error parsing user profile from backend:', error);
+          // Try synchronizing with backend
+          try {
+            // Sync user with our backend server
+            const userData = {
+              id: data.session.user.id,
+              email: data.session.user.email,
+              user_metadata: data.session.user.user_metadata
             }
+            
+            console.log("Sending user data to backend:", userData);
+            
+            // Send user data to our backend to create/sync user
+            const response = await apiRequest('/api/supabase-auth-user', {
+              method: 'POST',
+              body: JSON.stringify(userData),
+              headers: {
+                'Authorization': `Bearer ${data.session.access_token}`
+              }
+            })
+            
+            // Use the response from our backend API as the profile
+            if (response) {
+              try {
+                const backendUser = await response.json();
+                console.log("Backend user received:", backendUser);
+                
+                // Convert backend user to our Profile type
+                const backendProfile: Profile = {
+                  id: data.session.user.id,
+                  username: backendUser.username || userProfile.username,
+                  displayName: backendUser.displayName || userProfile.displayName,
+                  avatarInitials: backendUser.avatarInitials || userProfile.avatarInitials,
+                  role: backendUser.role || userProfile.role,
+                  level: backendUser.level || userProfile.level,
+                  levelProgress: backendUser.levelProgress || userProfile.levelProgress
+                };
+                
+                setProfile(backendProfile);
+                console.log("Updated profile from backend:", backendProfile);
+              } catch (error) {
+                console.error('Error parsing user profile from backend:', error);
+                // Keep using the temporary profile
+              }
+            }
+          } catch (error) {
+            console.error('Error syncing user data with backend:', error);
+            // Keep using the temporary profile
           }
         }
       } catch (error) {
-        console.error('Error during authentication initialization:', error)
+        console.error('Error during authentication initialization:', error);
       } finally {
-        setIsLoading(false)
+        console.log("Auth initialization completed, setting isLoading to false");
+        setIsLoading(false);
       }
     }
 
-    initializeAuth()
+    initializeAuth();
 
     return () => {
-      subscription.unsubscribe()
+      subscription.unsubscribe();
     }
   }, [])
 

@@ -14,22 +14,45 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [activeTab, setActiveTab] = useState('signin')
+  const [pageLoading, setPageLoading] = useState(false)
+  
+  // Log auth state for debugging
+  useEffect(() => {
+    console.log("Login page auth state:", { 
+      user: user ? "exists" : "null", 
+      profile: profile ? "exists" : "null", 
+      isLoading 
+    });
+  }, [user, profile, isLoading]);
 
   // Redirect to dashboard if already logged in
   useEffect(() => {
     if (user && profile && !isLoading) {
+      console.log("User is authenticated, redirecting to dashboard");
       setLocation('/')
+    } else if (!isLoading) {
+      console.log("Auth initialization completed");
     }
   }, [user, profile, isLoading, setLocation])
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    signInWithEmailPassword(email, password)
+    setPageLoading(true)
+    try {
+      await signInWithEmailPassword(email, password)
+    } finally {
+      setPageLoading(false)
+    }
   }
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    signUpWithEmailPassword(email, password, displayName)
+    setPageLoading(true)
+    try {
+      await signUpWithEmailPassword(email, password, displayName)
+    } finally {
+      setPageLoading(false)
+    }
   }
 
   return (
@@ -75,9 +98,9 @@ export default function Login() {
                   <Button 
                     type="submit" 
                     className="w-full"
-                    disabled={isLoading}
+                    disabled={pageLoading || isLoading}
                   >
-                    {isLoading ? 'Signing in...' : 'Sign in'}
+                    {pageLoading ? 'Signing in...' : 'Sign in'}
                   </Button>
                 </form>
               </TabsContent>
@@ -123,9 +146,9 @@ export default function Login() {
                   <Button 
                     type="submit" 
                     className="w-full"
-                    disabled={isLoading}
+                    disabled={pageLoading || isLoading}
                   >
-                    {isLoading ? 'Creating account...' : 'Sign up'}
+                    {pageLoading ? 'Creating account...' : 'Sign up'}
                   </Button>
                 </form>
               </TabsContent>
