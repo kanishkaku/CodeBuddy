@@ -40,6 +40,9 @@ function Router() {
       <Route path="/login">
         <Login />
       </Route>
+      <Route path="/app/login">
+        <Login />
+      </Route>
       <Route path="/app">
         <Landing />
       </Route>
@@ -57,6 +60,9 @@ function Router() {
   const authenticatedRoutes = (
     <Switch>
       <Route path="/login">
+        <Login />
+      </Route>
+      <Route path="/app/login">
         <Login />
       </Route>
       <Route path="/">

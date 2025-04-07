@@ -22,12 +22,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Special route to access the React app directly
   app.get('/app', (_req: Request, res: Response) => {
-    res.sendFile('app.html', { root: './client/public' });
+    res.sendFile('index.html', { root: './client' });
+  });
+  
+  // Handle the /app/login path directly
+  app.get('/app/login', (_req: Request, res: Response) => {
+    res.sendFile('index.html', { root: './client' });
   });
   
   // Login page - serve our login HTML that redirects to the React app login route
   app.get('/login', (_req: Request, res: Response) => {
-    res.sendFile('login.html', { root: './client/public' });
+    res.sendFile('index.html', { root: './client' });
   });
   // Error handling middleware
   const handleError = (err: any, res: Response) => {
