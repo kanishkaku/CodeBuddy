@@ -7,6 +7,7 @@ import {
   timestamp,
   json,
   primaryKey,
+  bigint,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -44,7 +45,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
 
 // Task schema
 export const tasks = pgTable("tasks", {
-  id: serial("id").primaryKey(),
+  id: bigint("id", { mode: "number" }).primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
   projectName: text("project_name").notNull(),
@@ -70,7 +71,7 @@ export const tasksRelations = relations(tasks, ({ many }) => ({
 export const contributions = pgTable("contributions", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
-  taskId: integer("task_id").notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  taskId: bigint("task_id", { mode: "number" }).notNull().references(() => tasks.id, { onDelete: 'cascade' }),
   completedAt: timestamp("completed_at").defaultNow().notNull(),
   pullRequestUrl: text("pull_request_url"),
   description: text("description"),
@@ -101,7 +102,7 @@ export const contributionsRelations = relations(contributions, ({ one }) => ({
 export const savedTasks = pgTable("saved_tasks", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
-  taskId: integer("task_id").notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  taskId: bigint("task_id", { mode: "number" }).notNull().references(() => tasks.id, { onDelete: 'cascade' }),
   savedAt: timestamp("saved_at").defaultNow().notNull(),
 });
 

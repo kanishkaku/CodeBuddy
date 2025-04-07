@@ -257,39 +257,41 @@ export default function TaskCard({ task }: TaskCardProps) {
       </Card>
       
       <Dialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Complete Task</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-[425px] bg-white border shadow-lg">
+          <DialogHeader className="bg-white border-b pb-2">
+            <DialogTitle className="text-black font-semibold">Complete Task</DialogTitle>
+            <DialogDescription className="text-gray-600">
               Mark this task as completed to add it to your resume. Add a pull request URL and description of what you accomplished.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4 bg-white">
             <div className="grid gap-2">
-              <Label htmlFor="pr-url">Pull Request URL (optional)</Label>
+              <Label htmlFor="pr-url" className="text-black font-medium">Pull Request URL (optional)</Label>
               <Input
                 id="pr-url"
                 placeholder="https://github.com/org/repo/pull/123"
                 value={pullRequestUrl}
                 onChange={(e) => setPullRequestUrl(e.target.value)}
+                className="bg-white border-gray-300"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-black font-medium">Description</Label>
               <Textarea
                 id="description"
                 placeholder="Describe what you accomplished"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
+                className="bg-white border-gray-300"
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="bg-white pt-2 border-t">
             <Button 
               variant="outline" 
               onClick={() => setCompleteDialogOpen(false)} 
-              className="flex items-center"
+              className="flex items-center bg-white"
               disabled={completing}
             >
               <X className="h-4 w-4 mr-1" />
