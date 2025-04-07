@@ -34,33 +34,23 @@ function Layout({ children }: { children: React.ReactNode }) {
 function Router() {
   const { user, profile, isLoading } = useAuth()
   
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    )
-  }
-  
-  // If not logged in, show landing and login pages
-  if (!user || !profile) {
-    return (
-      <Switch>
-        <Route path="/login">
-          <Login />
-        </Route>
-        <Route path="/">
-          <Landing />
-        </Route>
-        <Route>
-          <Landing />
-        </Route>
-      </Switch>
-    )
-  }
-  
-  // For authenticated users, show normal routes
-  return (
+  // Public routes that don't require authentication checks
+  const publicRoutes = (
+    <Switch>
+      <Route path="/login">
+        <Login />
+      </Route>
+      <Route path="/">
+        <Landing />
+      </Route>
+      <Route>
+        <NotFound />
+      </Route>
+    </Switch>
+  );
+
+  // Protected routes that require authentication
+  const authenticatedRoutes = (
     <Switch>
       <Route path="/login">
         <Login />
@@ -100,6 +90,23 @@ function Router() {
       </Route>
     </Switch>
   );
+  
+  // Show loading state only when checking authentication for protected routes
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+  
+  // If not logged in, show public routes
+  if (!user || !profile) {
+    return publicRoutes;
+  }
+  
+  // For authenticated users, show authenticated routes
+  return authenticatedRoutes;
 }
 
 function App() {
