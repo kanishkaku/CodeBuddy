@@ -10,6 +10,7 @@ import SavedTasks from "@/pages/saved-tasks";
 import LearningCenter from "@/pages/learning-center";
 import HelpCenter from "@/pages/help-center";
 import Login from "@/pages/login";
+import Landing from "@/pages/landing";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
@@ -41,15 +42,18 @@ function Router() {
     )
   }
   
-  // If not logged in, only show login page
+  // If not logged in, show landing and login pages
   if (!user || !profile) {
     return (
       <Switch>
         <Route path="/login">
           <Login />
         </Route>
+        <Route path="/">
+          <Landing />
+        </Route>
         <Route>
-          <Login />
+          <Landing />
         </Route>
       </Switch>
     )
