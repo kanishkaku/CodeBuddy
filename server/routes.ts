@@ -15,6 +15,10 @@ import { searchGitHubIssues, fetchGitHubIssueDetails } from "./githubService";
 import { fetchGoodFirstIssues } from "./goodFirstIssueService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve the landing page for the root route
+  app.get('/', (_req: Request, res: Response) => {
+    res.sendFile('landing.html', { root: './client/public' });
+  });
   // Error handling middleware
   const handleError = (err: any, res: Response) => {
     console.error(err);
