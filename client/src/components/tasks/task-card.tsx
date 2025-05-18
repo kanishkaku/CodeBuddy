@@ -48,7 +48,7 @@ export default function TaskCard({ task }: TaskCardProps) {
       await apiRequest("/api/saved-tasks", {
         method: "POST",
         body: JSON.stringify({
-          userId: user.id,
+          userId: parseInt(user.id),
           taskId: task.id,
         })
       });
