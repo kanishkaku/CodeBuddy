@@ -5,9 +5,9 @@ import {
   AuthChangeEvent, 
   AuthError
 } from '@supabase/supabase-js'
-import { supabase, getUserProfile, upsertUserProfile, type Profile } from '@/lib/supabase'
-import { useToast } from '@/hooks/use-toast'
-import { apiRequest } from '@/lib/queryClient'
+import { supabase, getUserProfile, upsertUserProfile, type Profile } from '../lib/supabase'
+import { useToast } from '../hooks/use-toast'
+import { apiRequest } from '../lib/queryClient'
 
 interface AuthContextType {
   user: User | null

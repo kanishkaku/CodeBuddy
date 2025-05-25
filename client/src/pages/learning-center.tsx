@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { BookOpen, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import ResourceCard from "@/components/resources/resource-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "../components/ui/input";
+import ResourceCard from "../components/resources/resource-card";
+import { Skeleton } from "../components/ui/skeleton";
 import { useState } from "react";
 
 export default function LearningCenter() {

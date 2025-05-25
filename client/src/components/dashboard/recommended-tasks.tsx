@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import TaskCard from "@/components/tasks/task-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import TaskCard from "../../components/tasks/task-card";
+import { Skeleton } from "../../components/ui/skeleton";
 
 export default function RecommendedTasks() {
   const { data: tasks, isLoading } = useQuery({

@@ -1,6 +1,6 @@
 import { Link } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { CheckIcon, Code2Icon, BriefcaseIcon, GraduationCapIcon, UsersIcon } from 'lucide-react';
 
 export default function PublicLanding() {

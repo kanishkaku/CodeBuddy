@@ -1,7 +1,7 @@
 import { useLocation, Link } from "wouter";
 import { Home, Search, FileText, Bookmark, BookOpen, HelpCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 type NavItem = {
   href: string;

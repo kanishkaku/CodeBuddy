@@ -1,7 +1,7 @@
-import { Card } from "@/components/ui/card";
+import { Card } from "../../components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import { Resource } from "@shared/schema";
+import { Resource } from "../../../../shared/schema";
 
 interface ResourceCardProps {
   resource: Resource;

@@ -2,19 +2,19 @@ import React from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/dashboard";
-import ExploreTasks from "@/pages/explore-tasks";
-import MyResume from "@/pages/my-resume";
-import SavedTasks from "@/pages/saved-tasks";
-import LearningCenter from "@/pages/learning-center";
-import HelpCenter from "@/pages/help-center";
-import Login from "@/pages/login";
-import Landing from "@/pages/landing";
-import Sidebar from "@/components/layout/sidebar";
-import Header from "@/components/layout/header";
-import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { Toaster } from "./components/ui/toaster";
+import NotFound from "./pages/not-found";
+import Dashboard from "./pages/dashboard";
+import ExploreTasks from "./pages/explore-tasks";
+import MyResume from "./pages/my-resume";
+import SavedTasks from "./pages/saved-tasks";
+import LearningCenter from "./pages/learning-center";
+import HelpCenter from "./pages/help-center";
+import Login from "./pages/login";
+import Landing from "./pages/landing";
+import Sidebar from "./components/layout/sidebar";
+import Header from "./components/layout/header";
+import { AuthProvider, useAuth } from "./hooks/use-auth";
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (

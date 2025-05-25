@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { Bookmark, AlertCircle } from "lucide-react";
-import TaskCard from "@/components/tasks/task-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import TaskCard from "../components/tasks/task-card";
+import { Skeleton } from "../components/ui/skeleton";
 
 export default function SavedTasks() {
   const { data: user } = useQuery({

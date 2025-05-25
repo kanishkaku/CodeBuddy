@@ -4,7 +4,7 @@ import {
   Activity, 
   Bookmark
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "../../components/ui/card";
 
 export default function StatsSection() {
   const { data: user } = useQuery({

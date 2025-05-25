@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Card } from "../components/ui/card";
+import { Input } from "../components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+} from "../components/ui/select";
+import { Badge } from "../components/ui/badge";
 import { Search, Github, AlertTriangle, Hourglass, Code } from "lucide-react";
-import TaskCard from "@/components/tasks/task-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { Task } from "@shared/schema";
-import { useToast } from "@/hooks/use-toast";
+import TaskCard from "../components/tasks/task-card";
+import { Skeleton } from "../components/ui/skeleton";
+import { Button } from "../components/ui/button";
+import { Task } from "../../../shared/schema";
+import { useToast } from "../hooks/use-toast";
 
 export default function ExploreTasks() {
   const [difficulty, setDifficulty] = useState<string>("");

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import ResourceCard from "@/components/resources/resource-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import ResourceCard from "../../components/resources/resource-card";
+import { Skeleton } from "../../components/ui/skeleton";
 
 export default function ResourcesSection() {
   const { data: resources, isLoading } = useQuery({

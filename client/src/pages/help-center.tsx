@@ -4,13 +4,13 @@ import {
   CardDescription, 
   CardHeader, 
   CardTitle 
-} from "@/components/ui/card";
+} from "../components/ui/card";
 import { 
   Accordion, 
   AccordionContent, 
   AccordionItem, 
   AccordionTrigger 
-} from "@/components/ui/accordion";
+} from "../components/ui/accordion";
 import { HelpCircle, Mail, MessageSquare } from "lucide-react";
 
 const faqs = [

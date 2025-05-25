@@ -32,6 +32,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Login page - serve our login HTML that redirects to the React app login route
   app.get('/login', (_req: Request, res: Response) => {
+    // log message to console
+    console.log("Serving login page");
     res.sendFile('index.html', { root: './client' });
   });
   // Error handling middleware

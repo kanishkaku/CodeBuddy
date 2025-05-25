@@ -10,45 +10,6 @@ const octokit = new Octokit({
   }
 });
 
-// Simple in-memory cache for GitHub API responses
-interface CacheEntry {
-  data: Task[];
-  timestamp: number;
-  key: string;
-}
-
-class APICache {
-  private cache: Map<string, CacheEntry> = new Map();
-  private readonly TTL: number = 5 * 60 * 1000; // 5 minutes cache TTL
-  
-  set(key: string, data: Task[]): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      key
-    });
-  }
-  
-  get(key: string): Task[] | null {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
-    
-    // Check if cache entry is still valid
-    if (Date.now() - entry.timestamp > this.TTL) {
-      this.cache.delete(key);
-      return null;
-    }
-    
-    return entry.data;
-  }
-  
-  clear(): void {
-    this.cache.clear();
-  }
-}
-
-const cache = new APICache();
-
 // Default repositories to search for issues in (prioritized order)
 const DEFAULT_REPOS = [
   // Prioritize these popular repos with many good first issues
@@ -109,16 +70,6 @@ export async function searchGitHubIssues(
   limit: number = 25
 ): Promise<Task[]> {
   try {
-    // Create a cache key based on the search parameters
-    const cacheKey = `github-search:${difficulty}:${searchQuery}`;
-    
-    // Check if we have cached results
-    const cachedResults = cache.get(cacheKey);
-    if (cachedResults) {
-      console.log(`[GitHub Service] Using cached results for: ${cacheKey}`);
-      return cachedResults;
-    }
-    
     let issues: GitHubIssue[] = [];
     let tasks: Task[] = [];
     let labelQuery = '';
@@ -154,17 +105,17 @@ export async function searchGitHubIssues(
           if (searchQuery) {
             queryParams.push(`${searchQuery} in:title,body`);
           }
-  
+
           const queryString = queryParams.join(" ");
           console.log(`[GitHub Service] Searching with query: ${queryString}`);
-  
+
           const response = await octokit.rest.search.issuesAndPullRequests({
             q: queryString,
             per_page: Math.min(10, limit), // Reduce per-repo limit
             sort: "created",
             order: "desc"
           });
-  
+
           if (response.data.items && response.data.items.length > 0) {
             return response.data.items;
           }
@@ -226,7 +177,7 @@ export async function searchGitHubIssues(
           // Find repository language
           const repoInfo = DEFAULT_REPOS.find(r => r.owner === repoOwner && r.repo === repoName) || 
                           { language: "Unknown" };
-  
+
           // Determine difficulty based on labels
           let taskDifficulty = "intermediate";
           const issueLabels = issue.labels.map(label => label.name.toLowerCase());
@@ -242,7 +193,7 @@ export async function searchGitHubIssues(
           )) {
             taskDifficulty = "advanced";
           }
-  
+
           // If specific difficulty was requested, use that
           if (difficulty) {
             // Special case for GitHub-specific filters
@@ -252,21 +203,21 @@ export async function searchGitHubIssues(
               taskDifficulty = difficulty;
             }
           }
-  
+
           // Clean up description - limited to first 300 chars
           let description = issue.body || "";
           description = description.replace(/\r\n|\n|\r/g, " ").trim();
           if (description.length > 300) {
             description = description.substring(0, 297) + "...";
           }
-  
+
           // Estimate hours based on difficulty
           const estimatedHours = taskDifficulty === "beginner" 
             ? "1-2 hours" 
             : taskDifficulty === "intermediate" 
               ? "2-5 hours" 
               : "5+ hours";
-  
+
           // Create tags from labels
           const tags = issue.labels
             .map(label => label.name)
@@ -280,10 +231,10 @@ export async function searchGitHubIssues(
           if (!tags.includes(repoInfo.language)) {
             tags.push(repoInfo.language);
           }
-  
+
           // Generate a synthetic unique ID from GitHub data
           const id = issue.id % 10000; // Use modulo to keep ID within reasonable range
-  
+
           return {
             id,
             title: issue.title,
@@ -305,14 +256,7 @@ export async function searchGitHubIssues(
 
     // Filter out null results from any errors
     tasks = tasks.filter(task => task !== null) as Task[];
-
     console.log(`[GitHub Service] Found ${tasks.length} tasks`);
-    
-    // Save the results in cache
-    if (tasks.length > 0) {
-      cache.set(cacheKey, tasks);
-    }
-    
     return tasks;
   } catch (error) {
     console.error("Error in searchGitHubIssues:", error);

@@ -2,69 +2,6 @@ import { Task } from "@shared/schema";
 import fetch from "node-fetch";
 import { log } from "./vite";
 
-// Cache implementation
-interface CacheEntry {
-  data: Task[];
-  timestamp: number;
-  key: string;
-}
-
-class APICache {
-  private cache: Map<string, CacheEntry> = new Map();
-  private readonly TTL: number = 15 * 60 * 1000; // 15 minutes cache TTL for Good First Issues API
-
-  set(key: string, data: Task[]): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      key,
-    });
-  }
-
-  get(key: string): Task[] | null {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
-
-    // Check if the entry is expired
-    if (Date.now() - entry.timestamp > this.TTL) {
-      this.cache.delete(key);
-      return null;
-    }
-
-    return entry.data;
-  }
-
-  clear(): void {
-    this.cache.clear();
-  }
-}
-
-const cache = new APICache();
-
-// Interface for goodfirstissue.dev API response
-interface GoodFirstIssue {
-  id: string;
-  title: string;
-  html_url: string;
-  created_at: string;
-  updated_at: string;
-  repository_url: string;
-  state: string;
-  labels: Array<{ name: string }>;
-  body: string;
-  repository: {
-    name: string;
-    full_name: string;
-    description: string;
-    language: string;
-    html_url: string;
-    owner: {
-      login: string;
-      avatar_url: string;
-    };
-  };
-}
-
 /**
  * Fetch "good first issues" from goodfirstissue.dev API
  * @param language - Optional filter by programming language
@@ -75,18 +12,6 @@ export async function fetchGoodFirstIssues(
   language?: string,
   labels?: string[],
 ): Promise<Task[]> {
-  const cacheKey = `gfi-${language || "all"}-${labels?.join(",") || "all"}`;
-
-  // Check if we have a valid cache entry
-  const cachedData = cache.get(cacheKey);
-  if (cachedData) {
-    log(
-      `[GoodFirstIssue Service] Returning cached issues for: ${cacheKey}`,
-      "express",
-    );
-    return cachedData;
-  }
-
   try {
     log(
       `[GoodFirstIssue Service] goodfirstissue.dev API is not available, using GitHub API instead`,
@@ -96,15 +21,15 @@ export async function fetchGoodFirstIssues(
     // The goodfirstissue.dev now uses a different format with client-side rendering
     // and doesn't have a clean API endpoint for direct access
     // So we'll use GitHub API directly to get good first issues
-    
+
     // Build the GitHub API URL for issues with "good first issue" label
     const apiUrl = "https://api.github.com/search/issues?q=is:issue+is:open+label:\"good+first+issue\"";
-    
+
     // Add language filter if provided
-    const fullUrl = language 
+    const fullUrl = language
       ? `${apiUrl}+language:${language}`
       : apiUrl;
-    
+
     log(`[GoodFirstIssue Service] Using GitHub API directly: ${fullUrl}`, 'express');
 
     // GitHub API requires a User-Agent header and benefits from authentication
@@ -150,7 +75,6 @@ export async function fetchGoodFirstIssues(
       );
     }
 
-    // Convert to our Task format
     const tasks: Task[] = filteredIssues.map((issue, index) => {
       // Extract repository info from the repository_url
       // Format: https://api.github.com/repos/owner/repo
@@ -208,9 +132,6 @@ export async function fetchGoodFirstIssues(
         createdAt: new Date(issue.created_at),
       };
     });
-
-    // Cache the results
-    cache.set(cacheKey, tasks);
 
     log(`[GoodFirstIssue Service] Found ${tasks.length} issues`, "express");
     return tasks;

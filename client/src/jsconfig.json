@@ -1,14 +1,12 @@
 {
   "compilerOptions": {
-    "jsx": "react",
-    "jsxFactory": "React.createElement",
-    "jsxFragmentFactory": "React.Fragment",
+    "jsx": "react-jsx",
     "target": "es2020",
     "module": "esnext",
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["client/src/*"]
     }
   },
   "include": ["./**/*.ts", "./**/*.tsx"]
