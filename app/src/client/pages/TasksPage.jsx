@@ -2,13 +2,14 @@ import { useQuery } from 'wasp/client/operations';
 import { fetchGitHubIssues } from 'wasp/client/operations';
 import { Link } from 'wasp/client/router';
 import { useState } from 'react';
+import TaskCard from '../components/TaskCard'; // Adjust path if different
 
 const TasksPage = () => {
     const [language, setLanguage] = useState('');
     const [difficulty, setDifficulty] = useState('good first issue');
     const [taskType, setTaskType] = useState('');
     const [page, setPage] = useState(1);
-    const perPage = 9;
+    const perPage = 12;
 
     const [queryArgs, setQueryArgs] = useState({
         language: '',
@@ -51,6 +52,19 @@ const TasksPage = () => {
         color: 'var(--color-foreground)',
         minWidth: '180px',
     };
+
+    const handleSaveTask = (taskId) => {
+        // You can call a mutation or update local state temporarily
+        console.log('Saving task:', taskId);
+        // Ideally: trigger a wasp mutation and update cache or use optimistic UI
+    };
+
+    const handleCompleteTask = (taskId, prUrl, summary) => {
+        // Call your backend or mock it
+        console.log('Completing task:', taskId, prUrl, summary);
+        // Save PR link and description to your contributions table
+    };
+
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
@@ -158,64 +172,30 @@ const TasksPage = () => {
                     <div
                         key={task.githubIssueId}
                         style={{
+                            width: '320px',
+                            minHeight: '440px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
                             border: '1px solid var(--color-border)',
                             borderRadius: '10px',
                             padding: '1.25rem',
-                            width: '320px',
                             background: 'var(--color-surface)',
                             color: 'var(--color-foreground)',
-                            display: 'flex',
-                            flexDirection: 'column',
                             boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                             transition: 'transform 0.2s ease',
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
                         onMouseLeave={(e) => (e.currentTarget.style.transform = 'none')}
                     >
-                        <h2 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{task.title}</h2>
-
-                        <p style={{ fontSize: '0.95rem', color: 'var(--color-muted)', flexGrow: 1, marginBottom: '0.75rem' }}>
-                            {task.description.length > 200 ? task.description.slice(0, 200) + '...' : task.description}
-                        </p>
-
-                        {task.labels && task.labels.length > 0 && (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.75rem' }}>
-                                {task.labels.map((label) => (
-                                    <span
-                                        key={label.name}
-                                        style={{
-                                            backgroundColor: `#${label.color}`,
-                                            color: '#fff',
-                                            padding: '0.25rem 0.5rem',
-                                            borderRadius: '999px',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 'bold',
-                                        }}
-                                    >
-                                        {label.name}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>{task.repository}</span>
-                            <a
-                                href={task.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                    fontSize: '0.85rem',
-                                    fontWeight: 'bold',
-                                    color: 'var(--color-primary)',
-                                    textDecoration: 'none',
-                                }}
-                            >
-                                View →
-                            </a>
-                        </div>
+                        <TaskCard
+                            task={task}
+                            onSave={handleSaveTask}
+                            onComplete={handleCompleteTask}
+                        />
                     </div>
                 ))}
+
             </div>
 
             {/* Pagination Controls */}
