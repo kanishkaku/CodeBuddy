@@ -4,7 +4,7 @@ export const fetchGitHubIssues = async (args, context) => {
     difficulty = 'good first issue',
     taskType = '',
     page = 1,
-    perPage = 10,
+    perPage = 12,
   } = args;
 
   const labels = [difficulty, taskType].filter(Boolean).map(l => `label:"${l}"`).join(' ');
@@ -37,7 +37,7 @@ export const fetchGitHubIssues = async (args, context) => {
       url: issue.html_url,
       labels: issue.labels || [],
     })),
-    hasMore: validIssues.length === perPage,
+    hasNextPage: validIssues.length === perPage,
     page,
   };
 };

@@ -321,9 +321,41 @@ page TasksPage {
   component: import TasksPage from "@src/client/pages/TasksPage"
 }
 
+// add route for DashboardPage.jsx
+route DashboardRoute { path: "/dashboard", to: DashboardPage }
+page DashboardPage {
+  component: import DashboardPage from "@src/client/pages/DashboardPage"
+}
+
 query fetchGitHubIssues {
   fn: import { fetchGitHubIssues } from "@src/server/action.js"
 }
+
+action saveTask {
+  fn: import { saveTask } from "@src/server/actions/saveTask.js",
+  entities: [TaskContribution]
+}
+
+action unsaveTask {
+  fn: import { unsaveTask } from "@src/server/actions/unsaveTask.js",
+  entities: [TaskContribution]
+}
+
+action completeTask {
+  fn: import { completeTask } from "@src/server/actions/completeTask.js",
+  entities: [TaskContribution]
+}
+
+query fetchSavedTasks {
+  fn: import { fetchSavedTasks } from "@src/server/queries/fetchSavedTasks.js",
+  entities: [TaskContribution]
+}
+
+query fetchCompletedTasks {
+  fn: import { fetchCompletedTasks } from "@src/server/queries/fetchCompletedTasks.js",
+  entities: [TaskContribution]
+}
+
 //#endregion
 
 //#region Contact Form Messages
