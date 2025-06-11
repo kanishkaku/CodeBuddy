@@ -1,5 +1,5 @@
 import { useQuery } from 'wasp/client/operations';
-import { fetchSavedTasks, fetchCompletedTasks, saveTask, unsaveTask, completeTask } from 'wasp/client/operations';
+import { fetchSavedTasks, fetchCompletedTasks, saveTask, unsaveTask, completeTask, updateTaskSummary } from 'wasp/client/operations';
 import { Link } from 'wasp/client/router';
 import { useState, useEffect } from 'react';
 import TaskCard from '../components/TaskCard';
@@ -21,6 +21,8 @@ export default function DashboardPage() {
 
   const [savedTasks, setSavedTasks] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
+  const [editingSummary, setEditingSummary] = useState(null);
+  const [editSummaryText, setEditSummaryText] = useState('');
 
   useEffect(() => {
     if (savedTasksRaw) {
@@ -75,6 +77,34 @@ export default function DashboardPage() {
     } catch (err) {
       console.error('Failed to complete task:', err);
     }
+  };
+
+  const handleEditSummary = (taskId, currentSummary) => {
+    setEditingSummary(taskId);
+    setEditSummaryText(currentSummary || '');
+  };
+
+  const handleSaveSummary = async (taskId) => {
+    try {
+      await updateTaskSummary({ taskId, summary: editSummaryText });
+      
+      // Update local state
+      setCompletedTasks(prev => prev.map(task => 
+        task.issueId === taskId 
+          ? { ...task, summary: editSummaryText }
+          : task
+      ));
+      
+      setEditingSummary(null);
+      setEditSummaryText('');
+    } catch (err) {
+      console.error('Failed to update summary:', err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingSummary(null);
+    setEditSummaryText('');
   };
 
   return (
@@ -192,14 +222,88 @@ export default function DashboardPage() {
                 }}
                 onSave={() => {}} // Disable save/unsave for completed tasks
                 onComplete={() => {}} // Disable re-completion
+                hideButtons={true} // Hide the action buttons
               />
-              {/* Show completion details */}
-              {t.prUrl && (
-                <div style={{ marginTop: '1rem', fontSize: '0.875rem' }}>
-                  <p><strong>PR:</strong> <a href={t.prUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>View Pull Request</a></p>
-                  {t.summary && <p><strong>Summary:</strong> {t.summary}</p>}
+              {/* Show completion details with edit functionality */}
+              <div style={{ marginTop: '1rem', fontSize: '0.875rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+                {t.prUrl && (
+                  <div style={{ marginBottom: '0.5rem' }}>
+                    <strong>PR:</strong> <a href={t.prUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>View Pull Request</a>
+                  </div>
+                )}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <strong>Summary:</strong>
+                    {editingSummary !== t.issueId && (
+                      <button
+                        onClick={() => handleEditSummary(t.issueId, t.summary)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--color-primary)',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          textDecoration: 'underline'
+                        }}
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </div>
+                  {editingSummary === t.issueId ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <textarea
+                        value={editSummaryText}
+                        onChange={e => setEditSummaryText(e.target.value)}
+                        style={{
+                          width: '100%',
+                          minHeight: '60px',
+                          padding: '0.5rem',
+                          border: '1px solid var(--color-border)',
+                          borderRadius: '4px',
+                          fontSize: '0.875rem',
+                          resize: 'vertical'
+                        }}
+                        placeholder="Describe what you did in this task..."
+                      />
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          onClick={() => handleSaveSummary(t.issueId)}
+                          style={{
+                            padding: '0.25rem 0.5rem',
+                            backgroundColor: 'var(--color-border)',
+                            color: 'var(--color-foreground)',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          style={{
+                            padding: '0.25rem 0.5rem',
+                            backgroundColor: 'var(--color-border)',
+                            color: 'var(--color-foreground)',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p style={{ margin: 0, color: 'var(--color-muted)' }}>
+                      {t.summary || 'No summary provided'}
+                    </p>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           ))}
         </div>

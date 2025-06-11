@@ -15,9 +15,10 @@ interface TaskCardProps {
   task: Task;
   onSave: (taskId: string) => void;
   onComplete: (taskId: string, prUrl: string, summary: string) => void;
+  hideButtons?: boolean;
 }
 
-export default function TaskCard({ task, onSave, onComplete }: TaskCardProps) {
+export default function TaskCard({ task, onSave, onComplete, hideButtons = false }: TaskCardProps) {
   const [showDialog, setShowDialog] = useState(false);
   const [prUrl, setPrUrl] = useState('');
   const [summary, setSummary] = useState('');
@@ -65,21 +66,23 @@ export default function TaskCard({ task, onSave, onComplete }: TaskCardProps) {
         </a>
       </div>
 
-      <div className="mt-6 flex justify-between items-center gap-3">
-        <button
-          onClick={() => onSave(task.githubIssueId)}
-          className="px-4 py-2 text-sm font-medium border rounded-md border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
-        >
-          {task.saved ? 'Unsave' : 'Save'}
-        </button>
+      {!hideButtons && (
+        <div className="mt-6 flex justify-between items-center gap-3">
+          <button
+            onClick={() => onSave(task.githubIssueId)}
+            className="px-4 py-2 text-sm font-medium border rounded-md border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+          >
+            {task.saved ? 'Unsave' : 'Save'}
+          </button>
 
-        <button
-          onClick={() => setShowDialog(true)}
-          className="px-4 py-2 text-sm font-semibold text-white bg-primary rounded-md hover:bg-primary/90"
-        >
-          {task.completed ? 'Completed' : 'Complete'}
-        </button>
-      </div>
+          <button
+            onClick={() => setShowDialog(true)}
+            className="px-4 py-2 text-sm font-semibold text-white bg-primary rounded-md hover:bg-primary/90"
+          >
+            {task.completed ? 'Completed' : 'Complete'}
+          </button>
+        </div>
+      )}
 
       {showDialog && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">

@@ -346,6 +346,11 @@ action completeTask {
   entities: [TaskContribution]
 }
 
+action updateTaskSummary {
+  fn: import { updateTaskSummary } from "@src/server/actions/updateTaskSummary.js",
+  entities: [TaskContribution]
+}
+
 query fetchSavedTasks {
   fn: import { fetchSavedTasks } from "@src/server/queries/fetchSavedTasks.js",
   entities: [TaskContribution]
