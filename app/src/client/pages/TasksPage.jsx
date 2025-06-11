@@ -73,22 +73,27 @@ export default function TasksPage() {
 
     const handleCompleteTask = async (taskId, prUrl, summary) => {
         try {
-            if (!prUrl || !summary) {
-                alert('Please provide both PR link and summary.');
-                return;
+            const task = tasks.issues.find(t => t.githubIssueId === taskId);
+            if (!task) return;
+
+            if (!task.saved) {
+                await saveTask({ task }); // ✅ ensure it's saved
             }
-            const updatedIssues = tasks.issues.map((task) => {
-                if (task.githubIssueId === taskId) {
-                    completeTask({ taskId, prUrl, summary });
-                    return { ...task, completed: true, prUrl, summary };
-                }
-                return task;
-            });
+
+            await completeTask({ taskId, prUrl, summary });
+
+            const updatedIssues = tasks.issues.map((t) =>
+                t.githubIssueId === taskId
+                    ? { ...t, completed: true, saved: true, prUrl, summary }
+                    : t
+            );
             setTasks({ ...tasks, issues: updatedIssues });
         } catch (err) {
             console.error('Error completing task:', err);
         }
     };
+
+
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>

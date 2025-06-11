@@ -100,8 +100,8 @@ export default function TaskCard({ task, onSave, onComplete }: TaskCardProps) {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-boxdark text-gray-900 dark:text-white"
               />
               <button
-                onClick={() => {
-                  onComplete(task.githubIssueId, prUrl, summary);
+                onClick={async () => {
+                  await onComplete(task.githubIssueId, prUrl, summary);
                   setShowDialog(false);
                   setPrUrl('');
                   setSummary('');
