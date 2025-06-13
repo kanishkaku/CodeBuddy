@@ -327,6 +327,12 @@ page DashboardPage {
   component: import DashboardPage from "@src/client/pages/DashboardPage"
 }
 
+// add route for resumePage.jsx
+route ResumeRoute { path: "/resume", to: ResumePage }
+page ResumePage {
+  component: import ResumePage from "@src/client/pages/ResumePage"
+}
+
 query fetchGitHubIssues {
   fn: import { fetchGitHubIssues } from "@src/server/action.js"
 }
@@ -351,6 +357,11 @@ action updateTaskSummary {
   entities: [TaskContribution]
 }
 
+action updateProfile {
+  fn: import { updateProfile } from "@src/server/actions/updateProfile.js",
+  entities: [Resume]
+}
+
 query fetchSavedTasks {
   fn: import { fetchSavedTasks } from "@src/server/queries/fetchSavedTasks.js",
   entities: [TaskContribution]
@@ -359,6 +370,11 @@ query fetchSavedTasks {
 query fetchCompletedTasks {
   fn: import { fetchCompletedTasks } from "@src/server/queries/fetchCompletedTasks.js",
   entities: [TaskContribution]
+}
+
+query fetchProfile {
+  fn: import { fetchProfile } from "@src/server/queries/fetchProfile.js",
+  entities: [Resume]
 }
 
 //#endregion

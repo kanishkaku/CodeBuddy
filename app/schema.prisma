@@ -128,3 +128,14 @@ model TaskContribution {
   createdAt   DateTime  @default(now())
   @@unique([userId, issueId], name: "userId_issueId")
 }
+
+model Resume {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  title                     String?         // Job title/position
+  summary                   String?         // Professional summary
+  skills                    String?         // Technical skills
+  experience                String?         // Work experience
+  education                 String?         // Education background
+}
