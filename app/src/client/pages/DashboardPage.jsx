@@ -123,48 +123,28 @@ export default function DashboardPage() {
         )}
         <div
           style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
             gap: '1.5rem',
             marginTop: '1rem',
           }}
         >
           {savedTasks?.filter(t => !t.completed).map((t) => (
-            <div
+            <TaskCard
               key={t.id}
-              style={{
-                width: '320px',
-                minHeight: '440px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                border: '1px solid var(--color-border)',
-                borderRadius: '10px',
-                padding: '1.25rem',
-                background: 'var(--color-surface)',
-                color: 'var(--color-foreground)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                transition: 'transform 0.2s ease',
+              task={{
+                githubIssueId: t.issueId, // Map issueId to githubIssueId for TaskCard
+                title: t.title,
+                description: t.description,
+                repository: t.repo,
+                url: t.url,
+                labels: Array.isArray(t.labels) ? t.labels : JSON.parse(t.labels || '[]'),
+                saved: true,
+                completed: false,
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = 'none')}
-            >
-              <TaskCard
-                task={{
-                  githubIssueId: t.issueId, // Map issueId to githubIssueId for TaskCard
-                  title: t.title,
-                  description: t.description,
-                  repository: t.repo,
-                  url: t.url,
-                  labels: Array.isArray(t.labels) ? t.labels : JSON.parse(t.labels || '[]'),
-                  saved: true,
-                  completed: false,
-                }}
-                onSave={(taskId) => handleSave(t.issueId)} // Pass the actual issueId
-                onComplete={(taskId, prUrl, summary) => handleComplete(t.issueId, prUrl, summary)} // Pass the actual issueId
-              />
-            </div>
+              onSave={(taskId) => handleSave(t.issueId)} // Pass the actual issueId
+              onComplete={(taskId, prUrl, summary) => handleComplete(t.issueId, prUrl, summary)} // Pass the actual issueId
+            />
           ))}
         </div>
       </section>
@@ -181,9 +161,8 @@ export default function DashboardPage() {
         )}
         <div
           style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
             gap: '1.5rem',
             marginTop: '1rem',
           }}
@@ -192,22 +171,10 @@ export default function DashboardPage() {
             <div
               key={t.id}
               style={{
-                width: '320px',
-                minHeight: '440px',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between',
-                border: '1px solid var(--color-border)',
-                borderRadius: '10px',
-                padding: '1.25rem',
-                background: 'var(--color-surface)',
-                color: 'var(--color-foreground)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                transition: 'transform 0.2s ease',
                 opacity: 0.8, // Slightly faded to show they're completed
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = 'none')}
             >
               <TaskCard
                 task={{
@@ -225,7 +192,7 @@ export default function DashboardPage() {
                 hideButtons={true} // Hide the action buttons
               />
               {/* Show completion details with edit functionality */}
-              <div style={{ marginTop: '1rem', fontSize: '0.875rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+              <div style={{ background: 'var(--color-surface)', padding: '1rem', border: '1px solid var(--color-border)', borderTop: 'none', borderRadius: '0 0 10px 10px' }}>
                 {t.prUrl && (
                   <div style={{ marginBottom: '0.5rem' }}>
                     <strong>PR:</strong> <a href={t.prUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>View Pull Request</a>

@@ -334,7 +334,7 @@ page ResumePage {
 }
 
 query fetchGitHubIssues {
-  fn: import { fetchGitHubIssues } from "@src/server/action.js"
+  fn: import { fetchGitHubIssues } from "@src/server/queries/fetchGitHubIssues.js"
 }
 
 action saveTask {

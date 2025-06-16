@@ -4,7 +4,6 @@ import { Link } from 'wasp/client/router';
 import { useState, useEffect } from 'react';
 import TaskCard from '../components/TaskCard'; // Adjust path if needed
 
-
 const languageOptions = [
     'JavaScript', 'Python', 'Java', 'TypeScript',
     'C++', 'C#', 'Go', 'Ruby', 'Rust', 'PHP'
@@ -70,7 +69,6 @@ export default function TasksPage() {
         }
     };
 
-
     const handleCompleteTask = async (taskId, prUrl, summary) => {
         try {
             const task = tasks.issues.find(t => t.githubIssueId === taskId);
@@ -93,142 +91,161 @@ export default function TasksPage() {
         }
     };
 
-
-
     return (
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
-            <h1 style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '2rem' }}>
-                🧠 Discover GitHub Coding Tasks
-            </h1>
-
-            {/* Filters */}
-            <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: '1rem',
-                marginBottom: '2rem'
-            }}>
-                <div style={{ minWidth: '200px' }}>
-                    <label>Language</label>
-                    <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ width: '100%' }}>
-                        <option value="">Select language...</option>
-                        {languageOptions.map((lang) => (
-                            <option key={lang} value={lang}>{lang}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div style={{ minWidth: '200px' }}>
-                    <label>Difficulty</label>
-                    <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={{ width: '100%' }}>
-                        {difficultyOptions.map((level) => (
-                            <option key={level} value={level}>{level}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div style={{ minWidth: '200px' }}>
-                    <label>Task Type</label>
-                    <select value={taskType} onChange={(e) => setTaskType(e.target.value)} style={{ width: '100%' }}>
-                        <option value="">Select type...</option>
-                        {taskTypeOptions.map((type) => (
-                            <option key={type} value={type}>{type}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <button onClick={handleSearch} style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '6px',
-                    backgroundColor: 'var(--color-primary)',
-                    color: 'var(--color-on-primary)',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    alignSelf: 'flex-end',
-                    height: '2.5rem'
-                }}>
-                    🔍 Search
-                </button>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="text-center mb-8">
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                    🧠 Discover GitHub Coding Tasks
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300">
+                    Find open source projects to contribute to and build your portfolio
+                </p>
             </div>
 
-            {/* Cards */}
+            {/* Improved Filters */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Language
+                        </label>
+                        <select 
+                            value={language} 
+                            onChange={(e) => setLanguage(e.target.value)}
+                            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        >
+                            <option value="">All languages</option>
+                            {languageOptions.map((lang) => (
+                                <option key={lang} value={lang}>{lang}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Difficulty
+                        </label>
+                        <select 
+                            value={difficulty} 
+                            onChange={(e) => setDifficulty(e.target.value)}
+                            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        >
+                            {difficultyOptions.map((level) => (
+                                <option key={level} value={level}>{level}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Task Type
+                        </label>
+                        <select 
+                            value={taskType} 
+                            onChange={(e) => setTaskType(e.target.value)}
+                            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        >
+                            <option value="">All types</option>
+                            {taskTypeOptions.map((type) => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <button 
+                        onClick={handleSearch}
+                        className="px-6 py-2.5 bg-blue-600 dark:bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center gap-2"
+                    >
+                        🔍 Search Tasks
+                    </button>
+                </div>
+            </div>
+
+            {/* Content */}
             {isLoading ? (
-                <p style={{ textAlign: 'center' }}>Loading...</p>
+                <div className="flex justify-center items-center py-12">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+                        <p className="text-gray-600 dark:text-gray-300">Loading tasks...</p>
+                    </div>
+                </div>
             ) : error ? (
-                <p style={{ textAlign: 'center', color: 'red' }}>Failed to load tasks.</p>
+                <div className="text-center py-12">
+                    <div className="text-red-500 text-lg mb-2">⚠️ Failed to load tasks</div>
+                    <p className="text-gray-600 dark:text-gray-300">Please try again later</p>
+                </div>
             ) : (
                 <>
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            justifyContent: 'center',
-                            gap: '1.5rem',
-                        }}
-                    >
+                    {/* Results summary */}
+                    {tasks?.issues && (
+                        <div className="mb-6">
+                            <p className="text-gray-600 dark:text-gray-300">
+                                Found {tasks.issues.length} tasks
+                                {language && ` in ${language}`}
+                                {difficulty && ` • ${difficulty}`}
+                                {taskType && ` • ${taskType}`}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Task Cards Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                         {tasks?.issues?.map((task) => (
-                            <div
+                            <TaskCard
                                 key={task.githubIssueId}
-                                style={{
-                                    width: '320px',
-                                    minHeight: '440px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'space-between',
-                                    border: '1px solid var(--color-border)',
-                                    borderRadius: '10px',
-                                    padding: '1.25rem',
-                                    background: 'var(--color-surface)',
-                                    color: 'var(--color-foreground)',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                                    transition: 'transform 0.2s ease',
-                                }}
-                                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
-                                onMouseLeave={(e) => (e.currentTarget.style.transform = 'none')}
-                            >
-                                <TaskCard
-                                    task={task}
-                                    onSave={handleSaveTask}
-                                    onComplete={handleCompleteTask}
-                                />
-                            </div>
+                                task={task}
+                                onSave={handleSaveTask}
+                                onComplete={handleCompleteTask}
+                            />
                         ))}
                     </div>
 
+                    {/* Empty state */}
+                    {tasks?.issues?.length === 0 && (
+                        <div className="text-center py-12">
+                            <div className="text-gray-400 text-6xl mb-4">🔍</div>
+                            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                                No tasks found
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300 mb-4">
+                                Try adjusting your filters to find more tasks
+                            </p>
+                            <button
+                                onClick={() => {
+                                    setLanguage('');
+                                    setDifficulty('good first issue');
+                                    setTaskType('');
+                                    setQueryArgs({ page: 1 });
+                                }}
+                                className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                            >
+                                Clear Filters
+                            </button>
+                        </div>
+                    )}
+
                     {/* Pagination */}
-                    {tasks && (
-                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', gap: '1rem' }}>
-                            {tasks.page > 1 && (
-                                <button
-                                    onClick={() => setQueryArgs((prev) => ({ ...prev, page: tasks.page - 1 }))}
-                                    style={{
-                                        padding: '0.5rem 1rem',
-                                        borderRadius: '6px',
-                                        backgroundColor: 'var(--color-border)',
-                                        color: 'var(--color-foreground)',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    ← Previous
-                                </button>
-                            )}
-                            {tasks.hasNextPage && (
-                                <button
-                                    onClick={() => setQueryArgs((prev) => ({ ...prev, page: tasks.page + 1 }))}
-                                    style={{
-                                        padding: '0.5rem 1rem',
-                                        borderRadius: '6px',
-                                        backgroundColor: 'var(--color-border)',
-                                        color: 'var(--color-foreground)',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    Next →
-                                </button>
-                            )}
+                    {tasks && tasks.issues && tasks.issues.length > 0 && (
+                        <div className="flex justify-center items-center gap-4">
+                            <button
+                                onClick={() => setQueryArgs((prev) => ({ ...prev, page: tasks.page - 1 }))}
+                                disabled={tasks.page <= 1}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                ← Previous
+                            </button>
+                            
+                            <span className="text-sm text-gray-600 dark:text-gray-300">
+                                Page {tasks.page}
+                            </span>
+                            
+                            <button
+                                onClick={() => setQueryArgs((prev) => ({ ...prev, page: tasks.page + 1 }))}
+                                disabled={!tasks.hasNextPage}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Next →
+                            </button>
                         </div>
                     )}
                 </>
