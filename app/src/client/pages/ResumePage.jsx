@@ -57,6 +57,49 @@ export default function ResumePage() {
     handleProfileUpdate('skills', newSkills);
   };
 
+  // Parse experience and education entries
+  const parseEntries = (text) => {
+    if (!text) return [];
+    
+    // Split by double newlines or lines that start with a capital letter and contain | or •
+    const entries = text.split(/\n\s*\n+/).filter(entry => entry.trim());
+    
+    return entries.map(entry => {
+      const lines = entry.trim().split('\n').map(line => line.trim()).filter(line => line);
+      if (lines.length === 0) return null;
+      
+      // Try to parse structured format: Title | Company | Date
+      const firstLine = lines[0];
+      const parts = firstLine.split('|').map(part => part.trim());
+      
+      if (parts.length >= 2) {
+        return {
+          title: parts[0],
+          company: parts[1],
+          date: parts[2] || '',
+          description: lines.slice(1).join('\n')
+        };
+      }
+      
+      // Fallback: treat first line as title, rest as description
+      return {
+        title: firstLine,
+        company: '',
+        date: '',
+        description: lines.slice(1).join('\n')
+      };
+    }).filter(entry => entry !== null);
+  };
+
+  const formatEntryText = (entries) => {
+    return entries.map(entry => {
+      const titleLine = [entry.title, entry.company, entry.date]
+        .filter(part => part)
+        .join(' | ');
+      return entry.description ? `${titleLine}\n${entry.description}` : titleLine;
+    }).join('\n\n');
+  };
+
   const handleExportPDF = () => {
     if (window.print) {
       window.print();
@@ -110,6 +153,9 @@ export default function ResumePage() {
   if (tasksError || profileError) {
     return <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>Error loading data</div>;
   }
+
+  const experienceEntries = parseEntries(profile.experience);
+  const educationEntries = parseEntries(profile.education);
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1rem' }}>
@@ -269,14 +315,48 @@ export default function ResumePage() {
         <section style={{ marginBottom: '2rem' }}>
           <h3 style={sectionHeader}>Experience</h3>
           {editMode ? (
-            <textarea
-              value={profile.experience || ''}
-              onChange={(e) => handleProfileUpdate('experience', e.target.value)}
-              style={inputStyle(true)}
-              placeholder="Enter your work experience..."
-            />
+            <div>
+              <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '6px', fontSize: '0.875rem', color: '#666' }}>
+                <strong>💡 Formatting Guide:</strong><br/>
+                Use this format for each position:<br/>
+                <code>Job Title | Company Name | Date Range</code><br/>
+                Add description on new lines. Separate positions with blank lines.<br/><br/>
+                <strong>Example:</strong><br/>
+                <code>Senior Developer | Tech Corp | 2022-Present</code><br/>
+                <code>Led development of microservices architecture...</code>
+              </div>
+              <textarea
+                value={profile.experience || ''}
+                onChange={(e) => handleProfileUpdate('experience', e.target.value)}
+                style={{ ...inputStyle(true), minHeight: '120px' }}
+                placeholder="Senior Developer | Tech Corp | 2022-Present&#10;Led development of microservices architecture serving 1M+ users&#10;Improved system performance by 40% through optimization&#10;&#10;Junior Developer | StartupXYZ | 2020-2022&#10;Built responsive web applications using React and Node.js"
+              />
+            </div>
           ) : (
-            <p>{profile.experience || 'No experience listed yet.'}</p>
+            <div>
+              {experienceEntries.length > 0 ? (
+                experienceEntries.map((entry, index) => (
+                  <div key={index} style={entryStyle}>
+                    <div style={entryHeaderStyle}>
+                      <h4 style={entryTitleStyle}>{entry.title}</h4>
+                      <div style={entryMetaStyle}>
+                        {entry.company && <span style={entryCompanyStyle}>{entry.company}</span>}
+                        {entry.date && <span style={entryDateStyle}>{entry.date}</span>}
+                      </div>
+                    </div>
+                    {entry.description && (
+                      <div style={entryDescriptionStyle}>
+                        {entry.description.split('\n').map((line, lineIndex) => (
+                          <p key={lineIndex} style={{ margin: '0.25rem 0' }}>{line}</p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p style={{ fontStyle: 'italic', color: '#888' }}>No experience listed yet.</p>
+              )}
+            </div>
           )}
         </section>
 
@@ -284,14 +364,48 @@ export default function ResumePage() {
         <section style={{ marginBottom: '2rem' }}>
           <h3 style={sectionHeader}>Education</h3>
           {editMode ? (
-            <textarea
-              value={profile.education || ''}
-              onChange={(e) => handleProfileUpdate('education', e.target.value)}
-              style={inputStyle(true)}
-              placeholder="Enter your education background..."
-            />
+            <div>
+              <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '6px', fontSize: '0.875rem', color: '#666' }}>
+                <strong>💡 Formatting Guide:</strong><br/>
+                Use this format for each degree/certification:<br/>
+                <code>Degree/Certificate | Institution | Year/Date</code><br/>
+                Add additional details on new lines. Separate entries with blank lines.<br/><br/>
+                <strong>Example:</strong><br/>
+                <code>Bachelor of Science in Computer Science | State University | 2020</code><br/>
+                <code>Relevant coursework: Data Structures, Algorithms, Database Design</code>
+              </div>
+              <textarea
+                value={profile.education || ''}
+                onChange={(e) => handleProfileUpdate('education', e.target.value)}
+                style={{ ...inputStyle(true), minHeight: '120px' }}
+                placeholder="Bachelor of Science in Computer Science | State University | 2020&#10;Relevant coursework: Data Structures, Algorithms, Database Design&#10;&#10;AWS Certified Solutions Architect | Amazon Web Services | 2023&#10;Professional certification in cloud architecture and services"
+              />
+            </div>
           ) : (
-            <p>{profile.education || 'No education information provided yet.'}</p>
+            <div>
+              {educationEntries.length > 0 ? (
+                educationEntries.map((entry, index) => (
+                  <div key={index} style={entryStyle}>
+                    <div style={entryHeaderStyle}>
+                      <h4 style={entryTitleStyle}>{entry.title}</h4>
+                      <div style={entryMetaStyle}>
+                        {entry.company && <span style={entryCompanyStyle}>{entry.company}</span>}
+                        {entry.date && <span style={entryDateStyle}>{entry.date}</span>}
+                      </div>
+                    </div>
+                    {entry.description && (
+                      <div style={entryDescriptionStyle}>
+                        {entry.description.split('\n').map((line, lineIndex) => (
+                          <p key={lineIndex} style={{ margin: '0.25rem 0' }}>{line}</p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p style={{ fontStyle: 'italic', color: '#888' }}>No education information provided yet.</p>
+              )}
+            </div>
           )}
         </section>
       </div>
@@ -419,4 +533,52 @@ const suggestionButtonStyle = {
     backgroundColor: '#e9ecef',
     borderColor: '#adb5bd'
   }
+};
+
+// New styles for structured entries
+const entryStyle = {
+  marginBottom: '1.5rem',
+  borderLeft: '2px solid #e0e0e0',
+  paddingLeft: '1rem'
+};
+
+const entryHeaderStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  marginBottom: '0.5rem',
+  flexWrap: 'wrap',
+  gap: '0.5rem'
+};
+
+const entryTitleStyle = {
+  margin: 0,
+  fontSize: '1.1rem',
+  fontWeight: 'bold',
+  color: '#333'
+};
+
+const entryMetaStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-end',
+  textAlign: 'right',
+  fontSize: '0.9rem'
+};
+
+const entryCompanyStyle = {
+  color: '#666',
+  fontWeight: '500'
+};
+
+const entryDateStyle = {
+  color: '#888',
+  fontSize: '0.85rem',
+  fontStyle: 'italic'
+};
+
+const entryDescriptionStyle = {
+  color: '#555',
+  fontSize: '0.95rem',
+  lineHeight: '1.5'
 };
