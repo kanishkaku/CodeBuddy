@@ -41,7 +41,7 @@ export default function AppNavBar({ navigationItems }: { navigationItems: Naviga
           >
             <NavLogo />
             {isLandingPage && (
-              <span className='ml-2 text-sm font-semibold leading-6 dark:text-white'>Your Saas</span>
+              <span className='ml-2 text-lg font-semibold leading-6 dark:text-white'>CodeBuddy</span>
             )}
           </WaspRouterLink>
         </div>
