@@ -1,4 +1,4 @@
-import { features, faqs, footerNavigation, testimonials } from './contentSections';
+import { faqs, footerNavigation, } from './contentSections';
 import Hero from './components/Hero';
 import Clients from './components/Clients';
 import Features from './components/Features';
@@ -13,9 +13,9 @@ export default function LandingPage() {
       <main className='isolate dark:bg-boxdark-2'>
         <Hero />
         {/* <Clients /> */}
-        <Features features={features} />
         <HowItWorks />
-        <Testimonials testimonials={testimonials} />
+        <Features />
+        <Testimonials />
         <FAQ faqs={faqs} />
       </main>
       <Footer footerNavigation={footerNavigation} />
