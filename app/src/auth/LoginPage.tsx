@@ -1,27 +1,22 @@
-import { Link as WaspRouterLink, routes } from 'wasp/client/router';
-import { LoginForm } from 'wasp/client/auth';
-import { AuthPageLayout } from './AuthPageLayout';
+import { LoginForm } from 'wasp/client/auth'
 
 export default function Login() {
   return (
-    <AuthPageLayout>
+    <Layout>
       <LoginForm />
-      <br />
-      <span className='text-sm font-medium text-gray-900 dark:text-gray-900'>
-        Don't have an account yet?{' '}
-        <WaspRouterLink to={routes.SignupRoute.to} className='underline'>
-          go to signup
-        </WaspRouterLink>
-        .
-      </span>
-      <br />
-      <span className='text-sm font-medium text-gray-900'>
-        Forgot your password?{' '}
-        <WaspRouterLink to={routes.RequestPasswordResetRoute.to} className='underline'>
-          reset it
-        </WaspRouterLink>
-        .
-      </span>
-    </AuthPageLayout>
-  );
+    </Layout>
+  )
+}
+
+// A layout component to center the content
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="h-full w-full bg-white">
+      <div className="flex min-h-[75vh] min-w-full items-center justify-center">
+        <div className="h-full w-full max-w-sm bg-white p-5">
+          <div>{children}</div>
+        </div>
+      </div>
+    </div>
+  )
 }
