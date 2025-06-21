@@ -80,7 +80,10 @@ export const UserMenuItems = ({ user, setMobileMenuOpen }: { user?: Partial<User
         </ul>
       )}
       <button
-        onClick={() => logout()}
+        onClick={async () => {
+          await logout();
+          window.location.href = '/tasks';
+        }}
         className={cn(
           'flex items-center gap-3.5 py-4 text-sm font-medium duration-300 ease-in-out hover:text-yellow-500',
           {

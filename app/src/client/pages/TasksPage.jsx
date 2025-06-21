@@ -1,6 +1,6 @@
 import { useQuery } from 'wasp/client/operations';
 import { fetchGitHubIssues, saveTask, unsaveTask, completeTask } from 'wasp/client/operations';
-import { Link } from 'wasp/client/router';
+import { useAuth } from 'wasp/client/auth';
 import { useState, useEffect } from 'react';
 import TaskCard from '../components/TaskCard'; // Adjust path if needed
 
@@ -18,6 +18,7 @@ const taskTypeOptions = [
 ];
 
 export default function TasksPage() {
+    const { data: user } = useAuth();
     const [language, setLanguage] = useState('');
     const [difficulty, setDifficulty] = useState('good first issue');
     const [taskType, setTaskType] = useState('');
@@ -196,6 +197,7 @@ export default function TasksPage() {
                                 task={task}
                                 onSave={handleSaveTask}
                                 onComplete={handleCompleteTask}
+                                hideButtons={!user}
                             />
                         ))}
                     </div>

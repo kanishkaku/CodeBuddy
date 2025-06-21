@@ -1,12 +1,18 @@
+import { useAuth } from 'wasp/client/auth';
 import { useQuery } from 'wasp/client/operations';
 import { fetchCompletedTasks, fetchProfile, updateProfile } from 'wasp/client/operations';
 import { useState, useRef, useEffect } from 'react';
-import { useAuth } from 'wasp/client/auth';
+import { Link as WaspRouterLink } from 'wasp/client/router';
+
 
 export default function ResumePage() {
   const { data: user } = useAuth();
-  const { data: completedTasks, isLoading: loadingTasks, error: tasksError } = useQuery(fetchCompletedTasks);
-  const { data: resumeData, isLoading: loadingProfile, error: profileError } = useQuery(fetchProfile);
+
+  // Always call hooks!
+  const { data: completedTasks, isLoading: loadingTasks, error: tasksError } =
+    useQuery(fetchCompletedTasks, undefined, { enabled: !!user });
+  const { data: resumeData, isLoading: loadingProfile, error: profileError } =
+    useQuery(fetchProfile, undefined, { enabled: !!user });
 
   const [editMode, setEditMode] = useState(false);
   const [profile, setProfile] = useState({
@@ -145,6 +151,22 @@ export default function ResumePage() {
       month: 'long',
     });
   };
+
+  if (!user) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='text-center'>
+          <p className='text-lg text-bodydark mb-8'>Login to see you resume</p>
+          <WaspRouterLink
+            to="/login"
+            className='inline-block px-8 py-3 text-white font-semibold bg-yellow-500 rounded-lg hover:bg-yellow-400 transition duration-300'
+          >
+            Login
+          </WaspRouterLink>
+        </div>
+      </div>
+    );
+  }
 
   if (loadingTasks || loadingProfile) {
     return <div style={{ textAlign: 'center', padding: '2rem' }}>Loading...</div>;
@@ -471,7 +493,7 @@ const inputStyle = (multiline = false) => ({
 const buttonStyle = (variant = 'neutral') => ({
   padding: '0.5rem 1rem',
   backgroundColor: variant === 'primary' ? 'var(--color-primary)' : 'var(--color-border)',
-  color: variant === 'primary' ? 'var(--color-on-primary)' : 'var(--color-foreground)',
+  color: variant === 'primary' ? 'var(--color-on-primary)' : 'var(--color-foreground',
   border: 'none',
   borderRadius: '6px',
   cursor: 'pointer',
