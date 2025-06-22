@@ -91,10 +91,10 @@ interface TaskCardProps {
   task: Task;
   onSave: (taskId: string) => void;
   onComplete: (taskId: string, prUrl: string, summary: string) => void;
-  hideButtons?: boolean;
+  disableButtons?: boolean;
 }
 
-export default function TaskCard({ task, onSave, onComplete, hideButtons = false }: TaskCardProps) {
+export default function TaskCard({ task, onSave, onComplete, disableButtons = false }: TaskCardProps) {
   const [showDialog, setShowDialog] = useState(false);
 
   const getDifficultyColor = (difficulty?: string) => {
@@ -220,34 +220,36 @@ export default function TaskCard({ task, onSave, onComplete, hideButtons = false
       </div>
 
       {/* Actions footer */}
-      {!hideButtons && (
-        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600 flex gap-3">
-          <button
-            onClick={() => onSave(task.githubIssueId)}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${task.saved
-                ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800'
-                : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-500'
-              }`}
-          >
-            <Bookmark
-              size={16}
-              fill={task.saved}
-            />
-            {task.saved ? 'Saved' : 'Save'}
-          </button>
+      <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600 flex gap-3">
+        <button
+          onClick={() => {
+            if (!disableButtons) { onSave(task.githubIssueId); }
+          }}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${task.saved
+            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800'
+            : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-500'
+            } ${disableButtons ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <Bookmark
+            size={16}
+            fill={task.saved}
+          />
+          {task.saved ? 'Saved' : 'Save'}
+        </button>
 
-          <button
-            onClick={() => setShowDialog(true)}
-            disabled={task.completed}
-            className={`flex-1 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${task.completed
-                ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-700 cursor-not-allowed'
-                : 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-md'
-              }`}
-          >
-            {task.completed ? '✅ Completed' : 'Mark Complete'}
-          </button>
-        </div>
-      )}
+        <button
+          onClick={() => {
+            if (!disableButtons) { setShowDialog(true); }
+          }}
+          disabled={task.completed}
+          className={`flex-1 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${task.completed
+            ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-700 cursor-not-allowed'
+            : 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-md'
+            } ${disableButtons ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {task.completed ? '✅ Completed' : 'Mark Complete'}
+        </button>
+      </div>
 
       {/* Completion dialog */}
       <CompletionDialog

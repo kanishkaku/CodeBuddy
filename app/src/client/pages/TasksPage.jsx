@@ -197,7 +197,7 @@ export default function TasksPage() {
                                 task={task}
                                 onSave={handleSaveTask}
                                 onComplete={handleCompleteTask}
-                                hideButtons={!user}
+                                disableButtons={!user}
                             />
                         ))}
                     </div>
