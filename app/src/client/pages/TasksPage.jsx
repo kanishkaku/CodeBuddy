@@ -110,8 +110,8 @@ export default function TasksPage() {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Language
                         </label>
-                        <select 
-                            value={language} 
+                        <select
+                            value={language}
                             onChange={(e) => setLanguage(e.target.value)}
                             className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         >
@@ -126,8 +126,8 @@ export default function TasksPage() {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Difficulty
                         </label>
-                        <select 
-                            value={difficulty} 
+                        <select
+                            value={difficulty}
                             onChange={(e) => setDifficulty(e.target.value)}
                             className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         >
@@ -141,8 +141,8 @@ export default function TasksPage() {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Task Type
                         </label>
-                        <select 
-                            value={taskType} 
+                        <select
+                            value={taskType}
                             onChange={(e) => setTaskType(e.target.value)}
                             className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         >
@@ -153,7 +153,7 @@ export default function TasksPage() {
                         </select>
                     </div>
 
-                    <button 
+                    <button
                         onClick={handleSearch}
                         className="px-6 py-2.5 bg-blue-600 dark:bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center gap-2"
                     >
@@ -236,18 +236,25 @@ export default function TasksPage() {
                             >
                                 ← Previous
                             </button>
-                            
+
                             <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Page {tasks.page}
                             </span>
-                            
-                            <button
-                                onClick={() => setQueryArgs((prev) => ({ ...prev, page: tasks.page + 1 }))}
-                                disabled={!tasks.hasNextPage}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Next →
-                            </button>
+
+                            <div className="relative flex flex-col items-center group">
+                                <button
+                                    onClick={() => setQueryArgs((prev) => ({ ...prev, page: tasks.page + 1 }))}
+                                    disabled={!user || !tasks.hasNextPage}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Next →
+                                </button>
+                                {(!user) && (
+                                    <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-3 py-1 text-xs shadow opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                        Access to additional pages is available for paid users only.
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     )}
                 </>

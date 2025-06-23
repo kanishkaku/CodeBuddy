@@ -333,6 +333,24 @@ page ResumePage {
   component: import ResumePage from "@src/client/pages/ResumePage"
 }
 
+// add route for TermsOfServicePage.jsx
+route TermsOfServiceRoute { path: "/TermsOfService", to: TermsOfServicePage }
+page TermsOfServicePage {
+  component: import TermsOfServicePage from "@src/client/pages/support/TermsOfServicePage"
+}
+
+// add route for PrivacyPolicyPage.jsx
+route PrivacyPolicyRoute { path: "/PrivacyPolicy", to: PrivacyPolicyPage }
+page PrivacyPolicyPage {
+  component: import PrivacyPolicyPage from "@src/client/pages/support/PrivacyPolicyPage"
+}
+
+// add route for ContactUsPage.jsx
+route ContactUsRoute { path: "/ContactUs", to: ContactUsPage }
+page ContactUsPage {
+  component: import ContactUsPage from "@src/client/pages/support/ContactUsPage"
+}
+
 query fetchGitHubIssues {
   fn: import { fetchGitHubIssues } from "@src/server/queries/fetchGitHubIssues.js"
 }

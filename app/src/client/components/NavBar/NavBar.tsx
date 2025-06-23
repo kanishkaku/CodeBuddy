@@ -144,7 +144,7 @@ function Announcement() {
   return (
     <div className='flex justify-center items-center gap-3 p-3 w-full bg-gradient-to-r from-[#d946ef] to-[#fc0] font-semibold text-white text-center z-49'>
       <p>
-        🎯 Real GitHub tasks for students are live - start building your resume today!
+        🎯 Real GitHub tasks for students are live - start contributing today!
       </p>
     </div>
   );

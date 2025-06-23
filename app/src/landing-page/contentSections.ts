@@ -8,8 +8,9 @@ export const landingPageNavigationItems: NavigationItem[] = [
   { name: 'Features', to: '#features' },
   { name: 'How It Works', to: '#howitworks' },
   { name: 'Pricing', to: routes.PricingPageRoute.to },
-  {name: 'Testimonials', to: '#testimonials' },
-  { name: 'Blog', to: BlogUrl },
+  { name: 'Testimonials', to: '#testimonials' },
+   { name: 'Blog', to: BlogUrl },
+  { name: 'Open Tasks', to: routes.TasksRoute.to },
 ];
 
 
@@ -24,12 +25,12 @@ export const faqs = [
 ];
 export const footerNavigation = {
   app: [
-    { name: 'Documentation', href: DocsUrl },
+    { name: 'Documentation', href: '#' },
     { name: 'Blog', href: BlogUrl },
   ],
   company: [
-    { name: 'About', href: 'https://wasp.sh' },
-    { name: 'Privacy', href: '#' },
-    { name: 'Terms of Service', href: '#' },
+    { name: 'Contact Us', href: routes.ContactUsRoute.to },
+    { name: 'Privacy Policy', href: routes.PrivacyPolicyRoute.to },
+    { name: 'Terms of Service', href: routes.TermsOfServiceRoute.to },
   ],
 };

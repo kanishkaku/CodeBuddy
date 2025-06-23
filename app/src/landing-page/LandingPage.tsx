@@ -16,7 +16,7 @@ export default function LandingPage() {
         <HowItWorks />
         <Features />
         <Testimonials />
-        <FAQ faqs={faqs} />
+        {/* <FAQ faqs={faqs} /> */}
       </main>
       <Footer footerNavigation={footerNavigation} />
     </div>
