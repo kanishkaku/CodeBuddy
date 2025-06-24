@@ -1,23 +1,30 @@
+# Use multi-platform base image
 FROM node:20
 
-# Install Wasp
+# Install Wasp CLI using the official installer (handles architecture detection)
 RUN curl -sSL https://get.wasp-lang.dev/installer.sh | bash
 
-# Add Wasp to PATH
-ENV PATH="/root/.wasp/bin:$PATH"
+# Copy wasp to a location in PATH
+RUN if [ -f "/root/.wasp/bin/wasp" ]; then \
+        cp /root/.wasp/bin/wasp /usr/local/bin/wasp && \
+        chmod +x /usr/local/bin/wasp; \
+    else \
+        echo "ERROR: wasp binary not found after installation"; \
+        find /root -name "*wasp*" -type f; \
+        exit 1; \
+    fi
 
-# Set working directory
+# Verify wasp is accessible
+RUN wasp --version
+
 WORKDIR /app
 
-# Copy all files
 COPY . .
 
-# Install node/prisma deps
 RUN npm install
+
 RUN wasp build
 
-# Expose port
 EXPOSE 3000
 
-# Start app
 CMD ["wasp", "start"]
