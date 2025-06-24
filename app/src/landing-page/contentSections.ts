@@ -9,7 +9,7 @@ export const landingPageNavigationItems: NavigationItem[] = [
   { name: 'How It Works', to: '#howitworks' },
   { name: 'Pricing', to: routes.PricingPageRoute.to },
   { name: 'Testimonials', to: '#testimonials' },
-   { name: 'Blog', to: BlogUrl },
+   //{ name: 'Blog', to: BlogUrl },
   { name: 'Open Tasks', to: routes.TasksRoute.to },
 ];
 
@@ -25,8 +25,8 @@ export const faqs = [
 ];
 export const footerNavigation = {
   app: [
-    { name: 'Documentation', href: '#' },
-    { name: 'Blog', href: BlogUrl },
+    // { name: 'Documentation', href: '#' },
+    // { name: 'Blog', href: BlogUrl },
   ],
   company: [
     { name: 'Contact Us', href: routes.ContactUsRoute.to },
