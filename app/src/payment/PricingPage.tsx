@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../client/cn';
 
-const bestDealPaymentPlanId: PaymentPlanId = PaymentPlanId.Pro;
+const bestDealPaymentPlanId: PaymentPlanId = PaymentPlanId.Credits10;
 
 interface PaymentPlanCard {
   name: string;
@@ -18,21 +18,33 @@ interface PaymentPlanCard {
 export const paymentPlanCards: Record<PaymentPlanId, PaymentPlanCard> = {
   [PaymentPlanId.Hobby]: {
     name: prettyPaymentPlanName(PaymentPlanId.Hobby),
-    price: '$9.99',
-    description: 'All you need to get started',
-    features: ['Limited monthly usage', 'Basic support'],
+    price: '₹1999',
+    description: 'Kickstart your journey with essential tools and resources designed for beginners and self-starters.',
+    features: [
+      'Unlimited access to curated GitHub tasks',
+      'Powerful Resume Builder to showcase your skills',
+      'Ideal for students and early professionals',
+    ],
   },
   [PaymentPlanId.Pro]: {
     name: prettyPaymentPlanName(PaymentPlanId.Pro),
-    price: '$19.99',
-    description: 'Our most popular plan',
-    features: ['Unlimited monthly usage', 'Priority customer support'],
+    price: '₹3999',
+    description: 'Unlock advanced features and exclusive opportunities to accelerate your growth and earning potential.',
+    features: [
+      'Everything in Hobby, plus advanced tools',
+      'Access to paid, high-value tasks',
+      'Priority support and early access to new features',
+    ],
   },
   [PaymentPlanId.Credits10]: {
     name: prettyPaymentPlanName(PaymentPlanId.Credits10),
-    price: '$9.99',
-    description: 'One-time purchase of 10 credits for your account',
-    features: ['Use credits for e.g. OpenAI API calls', 'No expiration date'],
+    price: '₹5999',
+    description: 'Make a one-time investment for lifetime access to all premium features—no recurring fees, ever.',
+    features: [
+      'All Pro features unlocked forever',
+      'No subscription required—pay once, enjoy always',
+      'Best value for long-term users and power learners',
+    ],
   },
 };
 
@@ -105,11 +117,6 @@ const PricingPage = () => {
             Pick your <span className='text-yellow-500'>pricing</span>
           </h2>
         </div>
-        <p className='mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600 dark:text-white'>
-          Choose between Stripe and LemonSqueezy as your payment provider. Just add your Product IDs! Try it
-          out below with test credit card number <br />
-          <span className='px-2 py-1 bg-gray-100 rounded-md text-gray-500'>4242 4242 4242 4242 4242</span>
-        </p>
         {errorMessage && (
           <div className='mt-8 p-4 bg-red-100 text-red-600 rounded-md dark:bg-red-200 dark:text-red-800'>
             {errorMessage}
@@ -154,7 +161,7 @@ const PricingPage = () => {
                     {paymentPlanCards[planId].price}
                   </span>
                   <span className='text-sm font-semibold leading-6 text-gray-600 dark:text-white'>
-                    {paymentPlans[planId].effect.kind === 'subscription' && '/month'}
+                    {paymentPlans[planId].effect.kind === 'subscription' && '/year'}
                   </span>
                 </p>
                 <ul role='list' className='mt-8 space-y-3 text-sm leading-6 text-gray-600 dark:text-white'>

@@ -53,7 +53,7 @@ export async function createStripeCheckoutSession({
       mode: mode,
       success_url: `${DOMAIN}/checkout?success=true`,
       cancel_url: `${DOMAIN}/checkout?canceled=true`,
-      automatic_tax: { enabled: true },
+      automatic_tax: { enabled: false },
       customer_update: {
         address: 'auto',
       },
