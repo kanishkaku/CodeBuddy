@@ -1,6 +1,5 @@
 import type { User } from 'wasp/entities';
 import { SubscriptionStatus, prettyPaymentPlanName, parsePaymentPlanId } from '../payment/plans';
-import { getCustomerPortalUrl, useQuery } from 'wasp/client/operations';
 import { Link as WaspRouterLink, routes } from 'wasp/client/router';
 import { logout } from 'wasp/client/auth';
 
@@ -80,7 +79,7 @@ function UserCurrentPaymentPlan({
         <dd className='mt-1 text-sm text-gray-900 dark:text-gray-400 sm:col-span-1 sm:mt-0'>
           {getUserSubscriptionStatusDescription({ subscriptionPlan, subscriptionStatus, datePaid })}
         </dd>
-        {subscriptionStatus !== SubscriptionStatus.Deleted ? <CustomerPortalButton /> : <BuyMoreButton />}
+        {subscriptionStatus !== SubscriptionStatus.Deleted ? "" : <BuyMoreButton />}
       </>
     );
   }
@@ -140,40 +139,8 @@ function BuyMoreButton() {
         to={routes.PricingPageRoute.to}
         className='font-medium text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500'
       >
-        Buy More/Upgrade
+        Buy a plan
       </WaspRouterLink>
-    </div>
-  );
-}
-
-function CustomerPortalButton() {
-  const {
-    data: customerPortalUrl,
-    isLoading: isCustomerPortalUrlLoading,
-    error: customerPortalUrlError,
-  } = useQuery(getCustomerPortalUrl);
-
-  const handleClick = () => {
-    if (customerPortalUrlError) {
-      console.error('Error fetching customer portal url');
-    }
-
-    if (customerPortalUrl) {
-      window.open(customerPortalUrl, '_blank');
-    } else {
-      console.error('Customer portal URL is not available');
-    }
-  };
-
-  return (
-    <div className='ml-4 flex-shrink-0 sm:col-span-1 sm:mt-0'>
-      <button
-        onClick={handleClick}
-        disabled={isCustomerPortalUrlLoading}
-        className='font-medium text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300'
-      >
-        Manage Subscription
-      </button>
     </div>
   );
 }

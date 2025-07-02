@@ -1,4 +1,3 @@
-import * as z from 'zod';
 import { requireNodeEnvVar } from '../server/utils';
 
 export enum SubscriptionStatus {
@@ -11,7 +10,6 @@ export enum SubscriptionStatus {
 export enum PaymentPlanId {
   Hobby = 'hobby',
   Pro = 'pro',
-  Credits10 = 'credits10',
 }
 
 export interface PaymentPlan {
@@ -32,17 +30,12 @@ export const paymentPlans: Record<PaymentPlanId, PaymentPlan> = {
     getPaymentProcessorPlanId: () => requireNodeEnvVar('PAYMENTS_PRO_SUBSCRIPTION_PLAN_ID'),
     effect: { kind: 'subscription' },
   },
-  [PaymentPlanId.Credits10]: {
-    getPaymentProcessorPlanId: () => requireNodeEnvVar('PAYMENTS_CREDITS_10_PLAN_ID'),
-    effect: { kind: 'credits', amount: 10 },
-  },
 };
 
 export function prettyPaymentPlanName(planId: PaymentPlanId): string {
   const planToName: Record<PaymentPlanId, string> = {
-    [PaymentPlanId.Hobby]: 'Hobby',
+    [PaymentPlanId.Hobby]: 'Basic',
     [PaymentPlanId.Pro]: 'Pro',
-    [PaymentPlanId.Credits10]: '10 Credits',
   };
   return planToName[planId];
 }
