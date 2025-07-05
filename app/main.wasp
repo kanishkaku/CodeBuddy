@@ -3,30 +3,20 @@ app OpenSaaS {
     version: "^0.16.0"
   },
 
-  title: "My Open SaaS App",
+  title: "ForgeMyCode | Code, Learn, and Land Jobs",
 
   head: [
     "<meta charset='utf-8' />",
-    "<meta name='description' content='Your apps main description and features.' />",
-    "<meta name='author' content='Your (App) Name' />",
-    "<meta name='keywords' content='saas, solution, product, app, service' />",
+    "<meta name='description' content='ForgeMyCode helps you build real coding skills, work on real-world projects, and land your dream tech job. Practice, build, and get hired!' />",
+    "<meta name='author' content='ForgeMyCode Team' />",
+    "<meta name='keywords' content='coding, programming, jobs, resume, projects, students, developers, tech careers, github tasks' />",
     
     "<meta property='og:type' content='website' />",
-    "<meta property='og:title' content='Your Open SaaS App' />",
-    "<meta property='og:site_name' content='Your Open SaaS App' />",
-    "<meta property='og:url' content='https://your-saas-app.com' />",
-    "<meta property='og:description' content='Your apps main description and features.' />",
-    "<meta property='og:image' content='https://your-saas-app.com/public-banner.webp' />",
-    "<meta name='twitter:image' content='https://your-saas-app.com/public-banner.webp' />",
-    "<meta name='twitter:image:width' content='800' />",
-    "<meta name='twitter:image:height' content='400' />",
-    "<meta name='twitter:card' content='summary_large_image' />",
-    // TODO: You can put your Plausible analytics scripts below (https://docs.opensaas.sh/guides/analytics/):
-    // NOTE: Plausible does not use Cookies, so you can simply add the scripts here.
-    // Google, on the other hand, does, so you must instead add the script dynamically
-    // via the Cookie Consent component after the user clicks the "Accept" cookies button.
-    "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.js'></script>",  // for production
-    "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.local.js'></script>",  // for development
+    "<meta property='og:title' content='ForgeMyCode | Build Real Skills, Land Real Jobs' />",
+    "<meta property='og:site_name' content='ForgeMyCode' />",
+    "<meta property='og:url' content='https://forgemycode.com' />",
+    "<meta property='og:description' content='Build your coding portfolio, practice with real GitHub tasks, and get noticed by recruiters. Start your journey to a tech career with ForgeMyCode.' />",
+    "<meta property='og:image' content='https://forgemycode.com/public-banner.webp' />",
   ],
 
   // 🔐 Auth out of the box! https://wasp.sh/docs/auth/overview

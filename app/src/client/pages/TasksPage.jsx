@@ -249,7 +249,7 @@ export default function TasksPage() {
                                 >
                                     Next →
                                 </button>
-                                {(!user) && (
+                                {(!user.subscriptionStatus == 'active') && (
                                     <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-3 py-1 text-xs shadow opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                         Access to additional pages is available for paid users only.
                                     </span>

@@ -9,3 +9,4 @@ node_modules/
 # Don't ignore example dotenv files.
 !.env.example
 !.env.*.example
+deploy_client.sh
