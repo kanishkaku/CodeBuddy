@@ -74,13 +74,19 @@ export default function Hero() {
                     {/* CTA Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4">
                       <Link
-                        to="/tasks"
+                        to="/pricing"
                         className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg shadow-blue-500/25 transition-all duration-200"
                       >
                         Get Started
                         <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
+                      </Link>
+                      <Link
+                        to="/tasks"
+                  className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-blue-700 bg-white border border-blue-600 hover:bg-blue-50 rounded-lg shadow transition-all duration-200"
+                      >
+                        See Open Tasks
                       </Link>
                     </div>
                     

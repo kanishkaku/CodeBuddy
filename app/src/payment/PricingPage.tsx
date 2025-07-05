@@ -4,7 +4,7 @@ import { PaymentPlanId, paymentPlans, prettyPaymentPlanName, SubscriptionStatus 
 import { AiFillCheckCircle, AiFillStar, AiFillCrown } from 'react-icons/ai';
 import { BsLightning } from 'react-icons/bs';
 import { HiSparkles } from 'react-icons/hi';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../client/cn';
 
@@ -73,13 +73,20 @@ const PricingPage = () => {
   const isUserSubscribed =
     !!user && !!user.subscriptionStatus && user.subscriptionStatus !== SubscriptionStatus.Deleted;
 
+  const navigate = useNavigate();
+
+  // Redirect subscribed users to /tasks
+  useEffect(() => {
+    if (isUserSubscribed) {
+      navigate('/tasks', { replace: true });
+    }
+  }, [isUserSubscribed, navigate]);
+
   const {
     data: customerPortalUrl,
     isLoading: isCustomerPortalUrlLoading,
     error: customerPortalUrlError,
   } = useQuery(getCustomerPortalUrl, { enabled: isUserSubscribed });
-
-  const navigate = useNavigate();
 
   async function handleBuyNowClick(paymentPlanId: PaymentPlanId) {
     if (!user) {

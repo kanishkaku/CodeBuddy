@@ -215,7 +215,7 @@ export default function TaskCard({ task, onSave, onComplete, disableButtons = fa
           className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
         >
           <ExternalLink size={14} />
-          View on GitHub
+          View
         </a>
       </div>
 

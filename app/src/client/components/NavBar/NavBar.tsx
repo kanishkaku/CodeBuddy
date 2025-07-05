@@ -40,9 +40,8 @@ export default function AppNavBar({ navigationItems }: { navigationItems: Naviga
             className='flex items-center -m-1.5 p-1.5 text-gray-900 duration-300 ease-in-out hover:text-yellow-500'
           >
             <NavLogo />
-            {isLandingPage && (
-              <span className='ml-2 text-lg font-semibold leading-6 dark:text-white'>ForgeMyCode</span>
-            )}
+            <span className='ml-2 text-lg font-semibold leading-6 dark:text-white'>ForgeMyCode</span>
+
           </WaspRouterLink>
         </div>
         <div className='flex lg:hidden'>

@@ -10,7 +10,7 @@ app OpenSaaS {
     "<meta name='description' content='ForgeMyCode helps you build real coding skills, work on real-world projects, and land your dream tech job. Practice, build, and get hired!' />",
     "<meta name='author' content='ForgeMyCode Team' />",
     "<meta name='keywords' content='coding, programming, jobs, resume, projects, students, developers, tech careers, github tasks' />",
-    
+
     "<meta property='og:type' content='website' />",
     "<meta property='og:title' content='ForgeMyCode | Build Real Skills, Land Real Jobs' />",
     "<meta property='og:site_name' content='ForgeMyCode' />",
@@ -57,7 +57,7 @@ app OpenSaaS {
       // }
     },
     onAuthFailedRedirectTo: "/login",
-    onAuthSucceededRedirectTo: "/tasks",
+    onAuthSucceededRedirectTo: "/pricing",
   },
 
   db: {
@@ -155,22 +155,6 @@ api paymentsWebhook {
 //#endregion
 
 //#region Analytics
-query getDailyStats {
-  fn: import { getDailyStats } from "@src/analytics/operations",
-  entities: [User, DailyStats]
-}
-
-job dailyStatsJob {
-  executor: PgBoss,
-  perform: {
-    fn: import { calculateDailyStats } from "@src/analytics/stats"
-  },
-  schedule: {
-    cron: "0 * * * *" // every hour. useful in production
-    // cron: "* * * * *" // every minute. useful for debugging
-  },
-  entities: [User, DailyStats, Logs, PageViewSource]
-}
 //#endregion
 
 //#region Admin Dashboard

@@ -1,7 +1,7 @@
 import './Main.css';
 import NavBar from './components/NavBar/NavBar';
 import CookieConsentBanner from './components/cookie-consent/Banner';
-import { appNavigationItems } from './components/NavBar/contentSections';
+import { getAppNavigationItems } from './components/NavBar/contentSections';
 import { landingPageNavigationItems } from '../landing-page/contentSections';
 import { useMemo, useEffect } from 'react';
 import { routes } from 'wasp/client/router';
@@ -17,7 +17,12 @@ export default function App() {
   const location = useLocation();
   const { data: user } = useAuth();
   const isLandingPage = useIsLandingPage();
-  const navigationItems = isLandingPage ? landingPageNavigationItems : appNavigationItems;
+  const isUserSubscribed =
+    !!user && !!user.subscriptionStatus && user.subscriptionStatus !== 'Deleted';
+
+  const navigationItems = isLandingPage
+    ? landingPageNavigationItems
+    : getAppNavigationItems(isUserSubscribed);
 
   const shouldDisplayAppNavBar = useMemo(() => {
     return location.pathname !== routes.LoginRoute.build() && location.pathname !== routes.SignupRoute.build();
