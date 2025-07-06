@@ -197,7 +197,7 @@ export default function TasksPage() {
                                 task={task}
                                 onSave={handleSaveTask}
                                 onComplete={handleCompleteTask}
-                                disableButtons={!user}
+                                disableButtons={!user?.subscriptionStatus}
                             />
                         ))}
                     </div>
@@ -244,14 +244,26 @@ export default function TasksPage() {
                             <div className="relative flex flex-col items-center group">
                                 <button
                                     onClick={() => setQueryArgs((prev) => ({ ...prev, page: tasks.page + 1 }))}
-                                    disabled={!user || !tasks.hasNextPage}
+                                    disabled={!user?.subscriptionStatus || !tasks.hasNextPage}
                                     className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     Next →
                                 </button>
-                                {(!user?.subscriptionStatus == 'active') && (
-                                    <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-3 py-1 text-xs shadow opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                        Access to additional pages is available for paid users only.
+                                {(!user?.subscriptionStatus) && (
+                                    <span className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 px-4 py-2 text-xs font-semibold shadow-lg border border-blue-200 dark:border-blue-700 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
+                                      <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+                                      </svg>
+                                      <span>
+                                        <span>Upgrade to Pro to unlock more tasks!</span>
+                                        <a
+                                          href="/pricing"
+                                          className="ml-2 underline text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100 transition"
+                                          tabIndex={-1}
+                                        >
+                                          See plans
+                                        </a>
+                                      </span>
                                     </span>
                                 )}
                             </div>

@@ -220,35 +220,42 @@ export default function TaskCard({ task, onSave, onComplete, disableButtons = fa
       </div>
 
       {/* Actions footer */}
-      <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600 flex gap-3">
-        <button
-          onClick={() => {
-            if (!disableButtons) { onSave(task.githubIssueId); }
-          }}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${task.saved
-            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800'
-            : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-500'
-            } ${disableButtons ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <Bookmark
-            size={16}
-            fill={task.saved}
-          />
-          {task.saved ? 'Saved' : 'Save'}
-        </button>
+      <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600 flex flex-col gap-2">
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              if (!disableButtons) { onSave(task.githubIssueId); }
+            }}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${task.saved
+              ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800'
+              : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-500'
+              } ${disableButtons ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <Bookmark
+              size={16}
+              fill={task.saved}
+            />
+            {task.saved ? 'Saved' : 'Save'}
+          </button>
 
-        <button
-          onClick={() => {
-            if (!disableButtons) { setShowDialog(true); }
-          }}
-          disabled={task.completed}
-          className={`flex-1 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${task.completed
-            ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-700 cursor-not-allowed'
-            : 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-md'
-            } ${disableButtons ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          {task.completed ? '✅ Completed' : 'Mark Complete'}
-        </button>
+          <button
+            onClick={() => {
+              if (!disableButtons) { setShowDialog(true); }
+            }}
+            disabled={task.completed}
+            className={`flex-1 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${task.completed
+              ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-700 cursor-not-allowed'
+              : 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-md'
+              } ${disableButtons ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {task.completed ? '✅ Completed' : 'Mark Complete'}
+          </button>
+        </div>
+        {disableButtons && (
+          <div className="text-center text-xs text-blue-600 dark:text-blue-300 font-semibold mt-2">
+            Unlock with Subscription
+          </div>
+        )}
       </div>
 
       {/* Completion dialog */}
