@@ -3,6 +3,10 @@ app OpenSaaS {
     version: "^0.16.0"
   },
 
+  server: {
+    middlewareConfigFn: import { serverMiddlewareFn } from "@src/serverSetup"
+  },
+
   title: "ForgeMyCode | Code, Learn, and Land Jobs",
 
   head: [
